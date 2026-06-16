@@ -11,17 +11,10 @@ Clinical basis:
   - Validated approach: doi.org/10.1038/s41746-020-0253-3
 """
 
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers, Model
-from tensorflow.keras.applications import MobileNetV2
-from tensorflow.keras.callbacks import (
-    EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, TensorBoard
-)
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
 import numpy as np
 import os
 import json
+
 
 
 # ──────────────────────────────────────────────
@@ -47,6 +40,7 @@ def build_data_generators(data_dir: str):
       - Zoom: distance from eye/finger varies
       - Flip: left/right hand, left/right eye
     """
+    from tensorflow.keras.preprocessing.image import ImageDataGenerator
     train_datagen = ImageDataGenerator(
         rescale=1.0 / 255,
         rotation_range=20,
@@ -84,7 +78,7 @@ def build_data_generators(data_dir: str):
 # ──────────────────────────────────────────────
 # MODEL ARCHITECTURE
 # ──────────────────────────────────────────────
-def build_anemia_model(fine_tune_layers: int = 30) -> Model:
+def build_anemia_model(fine_tune_layers: int = 30):
     """
     MobileNetV2 Transfer Learning for Anemia Detection.
 
@@ -102,6 +96,11 @@ def build_anemia_model(fine_tune_layers: int = 30) -> Model:
         → Dense(64, ReLU)
         → Dense(1, Sigmoid)  → Anemia probability
     """
+    import tensorflow as tf
+    from tensorflow import keras
+    from tensorflow.keras import layers, Model
+    from tensorflow.keras.applications import MobileNetV2
+
     # Base model — ImageNet pretrained
     base_model = MobileNetV2(
         input_shape=(IMG_SIZE, IMG_SIZE, 3),
@@ -144,6 +143,10 @@ def build_anemia_model(fine_tune_layers: int = 30) -> Model:
 # TRAINING
 # ──────────────────────────────────────────────
 def train_model(data_dir: str, model_dir: str = MODEL_DIR):
+    import tensorflow as tf
+    from tensorflow import keras
+    from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
+
     os.makedirs(model_dir, exist_ok=True)
 
     print("\n🔬 SwasthAI – Anemia Detection Model Training")
@@ -331,11 +334,17 @@ class AnemiaDetector:
         self.use_tflite = model_path.endswith(".tflite")
 
         if self.use_tflite:
-            self.interpreter = tf.lite.Interpreter(model_path=model_path)
+            try:
+                import tflite_runtime.interpreter as tflite
+                self.interpreter = tflite.Interpreter(model_path=model_path)
+            except ImportError:
+                import tensorflow as tf
+                self.interpreter = tf.lite.Interpreter(model_path=model_path)
             self.interpreter.allocate_tensors()
             self.input_details  = self.interpreter.get_input_details()
             self.output_details = self.interpreter.get_output_details()
         else:
+            from tensorflow import keras
             self.model = keras.models.load_model(model_path)
 
         print(f"✅ AnemiaDetector loaded: {'TFLite' if self.use_tflite else 'Keras'}")

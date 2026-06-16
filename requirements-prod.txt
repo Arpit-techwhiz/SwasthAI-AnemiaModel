@@ -1,0 +1,20 @@
+# SwasthAI Anemia Detection API - Production Requirements
+# Usage: pip install -r requirements-prod.txt
+
+# Lightweight ML Inference
+tflite-runtime>=2.13.0
+
+# Core utilities
+numpy>=1.24.0
+
+# Headless Image Processing (removes GUI system dependencies for servers)
+opencv-python-headless>=4.8.0
+Pillow>=10.0.0
+
+# API and CORS
+flask>=3.0.0
+flask-cors>=4.0.0
+
+# WSGI Production Servers
+gunicorn>=21.0.0
+waitress>=3.0.0

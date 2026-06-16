@@ -461,8 +461,8 @@
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         ipInput.value = window.location.origin;
     } else {
-        // Default to the computer's actual local IP address so it works on local Wi-Fi out of the box
-        ipInput.value = 'http://10.230.182.17:5000';
+        // Default to the 24/7 Render cloud deployment URL
+        ipInput.value = 'https://swasthai-anemia-api.onrender.com';
     }
 
     function setScanType(type) {
