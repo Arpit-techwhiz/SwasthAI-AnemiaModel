@@ -25,6 +25,8 @@ import json
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 app = Flask(__name__)
+from flask_cors import CORS
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # ── Load model on startup ──
 MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "models", "swasthai_anemia.tflite")
