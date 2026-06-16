@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwasthAI – Mobile Anemia Screening Client</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0f14;
+            --card-bg: rgba(20, 24, 33, 0.75);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --primary: #ff4757;
+            --primary-glow: rgba(255, 71, 87, 0.35);
+            --text-main: #f1f2f6;
+            --text-muted: #a4b0be;
+            --success: #2ed573;
+            --warning: #ffa502;
+            --danger: #ff4757;
+            --critical: #eb4d4b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Outfit', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 15px;
+            overflow-x: hidden;
+        }
+
+        .phone-container {
+            width: 100%;
+            max-width: 440px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 28px;
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 4px;
+        }
+
+        .scan-type-selector {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .scan-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .scan-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px var(--primary-glow);
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 71, 87, 0.3);
+            border-radius: 20px;
+            padding: 35px 20px;
+            text-align: center;
+            cursor: pointer;
+            position: relative;
+            background: rgba(255, 71, 87, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(255, 71, 87, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .upload-text {
+            font-weight: 500;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .upload-subtext {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        #file-input {
+            display: none;
+        }
+
+        .preview-img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 18px;
+            display: none;
+        }
+
+        .analyze-btn {
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 6px 16px var(--primary-glow);
+        }
+
+        .analyze-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .result-card {
+            display: none;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .severity-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .prob-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .prob-circle-outer {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background: conic-gradient(var(--primary) 0%, rgba(255,255,255,0.05) 0%);
+            padding: 6px;
+        }
+
+        .prob-circle-inner {
+            background: #141821;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .prob-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .prob-lbl {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .metric-item {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .metric-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .metric-val {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .advice-box {
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 3px solid var(--primary);
+            padding: 12px;
+            border-radius: 4px 12px 12px 4px;
+            margin-bottom: 14px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .hindi-advice {
+            font-style: italic;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+
+        .recs-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .recs-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .recs-list li {
+            font-size: 0.85rem;
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+        }
+
+        .recs-list li::before {
+            content: "•";
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        footer {
+            margin-top: auto;
+            padding-top: 15px;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="phone-container">
+    <header>
+        <h1>SwasthAI</h1>
+        <p>Anemia Detection AI (Mobile Client)</p>
+    </header>
+
+    <div class="scan-type-selector">
+        <button class="scan-btn active" onclick="setScanType('conjunctiva')">👁️ Conjunctiva</button>
+        <button class="scan-btn" onclick="setScanType('fingernail')">💅 Fingernail</button>
+    </div>
+
+    <div class="upload-area" onclick="triggerUpload()" id="dropzone">
+        <span class="upload-icon">📸</span>
+        <span class="upload-text">Upload or Take Photo</span>
+        <span class="upload-subtext">Supports Tap to Capture / File Drag & Drop</span>
+        <img class="preview-img" id="image-preview" alt="Preview">
+    </div>
+
+    <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleFile(event)">
+
+    <button class="analyze-btn" id="analyze-btn" disabled onclick="analyzeImage()">
+        <span class="loader" id="btn-loader"></span>
+        <span id="btn-text">Run Diagnosis</span>
+    </button>
+
+    <div class="result-card" id="result-card">
+        <div class="result-header">
+            <h3 style="font-weight: 600;">Screening Report</h3>
+            <span class="severity-badge" id="badge-elem"></span>
+        </div>
+
+        <div class="prob-section">
+            <div class="prob-circle-outer" id="circle-outer">
+                <div class="prob-circle-inner">
+                    <span class="prob-value" id="val-probability">0.0%</span>
+                    <span class="prob-lbl">Probability</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-item">
+                <div class="metric-title">Hemoglobin Est.</div>
+                <div class="metric-val" id="val-hgb">--</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-title">Confidence</div>
+                <div class="metric-val" id="val-conf">--</div>
+            </div>
+        </div>
+
+        <div class="advice-box">
+            <div id="val-advice">--</div>
+            <div class="hindi-advice" id="val-advice-hindi">--</div>
+        </div>
+
+        <div id="recs-section">
+            <div class="recs-title">Recommendations</div>
+            <ul class="recs-list" id="val-recs"></ul>
+        </div>
+    </div>
+</div>
+
+<footer>
+    SwasthAI v1.0.0 • Local Host Client
+</footer>
+
+<script>
+    let currentScanType = 'conjunctiva';
+    let base64Image = null;
+
+    function setScanType(type) {
+        currentScanType = type;
+        document.querySelectorAll('.scan-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.innerText.toLowerCase().includes(type)) {
+                btn.classList.add('active');
+            }
+        });
+    }
+
+    function triggerUpload() {
+        document.getElementById('file-input').click();
+    }
+
+    function handleFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('image-preview');
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+
+            // Get raw base64 string
+            base64Image = e.target.result.split(',')[1];
+            document.getElementById('analyze-btn').disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Drag and drop events
+    const dropzone = document.getElementById('dropzone');
+    dropzone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropzone.classList.add('dragover');
+    });
+    dropzone.addEventListener('dragleave', () => {
+        dropzone.classList.remove('dragover');
+    });
+    dropzone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            document.getElementById('file-input').files = e.dataTransfer.files;
+            handleFile({ target: { files: e.dataTransfer.files } });
+        }
+    });
+
+    async function analyzeImage() {
+        if (!base64Image) return;
+
+        const loader = document.getElementById('btn-loader');
+        const btnText = document.getElementById('btn-text');
+        const btn = document.getElementById('analyze-btn');
+        const card = document.getElementById('result-card');
+
+        loader.style.display = 'block';
+        btnText.innerText = 'Analyzing Image...';
+        btn.disabled = true;
+        card.style.display = 'none';
+
+        // Dynamically get the current API origin so it works from mobile browsers too
+        const apiOrigin = window.location.origin;
+
+        try {
+            const response = await fetch(`${apiOrigin}/predict/b64`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    image_b64: base64Image,
+                    scan_type: currentScanType,
+                    patient_id: `MOBILE-${Math.floor(1000 + Math.random() * 9000)}`
+                })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                renderResult(data);
+            } else {
+                alert(`Error: ${data.error || 'Failed to analyze'}`);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Could not connect to SwasthAI Server. Please check network connection.');
+        } finally {
+            loader.style.display = 'none';
+            btnText.innerText = 'Run Diagnosis';
+            btn.disabled = false;
+        }
+    }
+
+    function renderResult(data) {
+        const card = document.getElementById('result-card');
+        
+        // Probability conic gradient coloring
+        const probVal = data.anemia_probability;
+        const probPercent = (probVal * 100).toFixed(1);
+        document.getElementById('val-probability').innerText = `${probPercent}%`;
+        
+        // Set dynamic colors based on severity
+        let color = 'var(--success)';
+        if (data.severity === 'MODERATE RISK') color = 'var(--warning)';
+        else if (data.severity === 'HIGH RISK') color = 'var(--danger)';
+        else if (data.severity === 'CRITICAL') color = 'var(--critical)';
+
+        document.getElementById('circle-outer').style.background = `conic-gradient(${color} ${probPercent}%, rgba(255,255,255,0.05) ${probPercent}%)`;
+
+        // Badge
+        const badge = document.getElementById('badge-elem');
+        badge.innerText = `${data.icon} ${data.severity}`;
+        badge.style.backgroundColor = `${color}25`; // 15% opacity
+        badge.style.color = color;
+        badge.style.border = `1px solid ${color}40`;
+
+        // Details
+        document.getElementById('val-hgb').innerText = data.hemoglobin_estimate.split(' ')[0]; // Grab "~12-16" or similar
+        document.getElementById('val-conf').innerText = `${data.confidence}%`;
+        document.getElementById('val-advice').innerText = data.advice;
+        document.getElementById('val-advice-hindi').innerText = data.hindi_advice;
+
+        // Recommendations list
+        const recsContainer = document.getElementById('val-recs');
+        recsContainer.innerHTML = '';
+        
+        // Populate standard recommendations based on probability
+        const recs = [];
+        if (probVal > 0.3) {
+            recs.push("Complete Blood Count (CBC) test recommended");
+            recs.push("Increase iron intake: spinach, lentils, jaggery, beetroot");
+        } else {
+            recs.push("Normal range. Continue maintaining a balanced, healthy diet");
+            recs.push("Check again if symptoms of fatigue or dizziness occur");
+        }
+        if (probVal > 0.55) {
+            recs.push("Schedule a consultation with a physician");
+            recs.push("Incorporate Vitamin C with meals to boost iron absorption");
+        }
+        if (probVal > 0.75) {
+            recs.push("URGENT: Immediate clinical attention recommended");
+        }
+
+        recs.forEach(rec => {
+            const li = document.createElement('li');
+            li.innerText = rec;
+            recsContainer.appendChild(li);
+        });
+
+        card.style.display = 'block';
+        // Scroll card into view
+        card.scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
+
+</body>
+</html>

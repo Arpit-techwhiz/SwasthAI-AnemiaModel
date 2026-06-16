@@ -1,0 +1,10 @@
+{
+  "classes": {
+    "anemic": 0,
+    "non_anemic": 1
+  },
+  "img_size": 224,
+  "model_version": "1.0.0",
+  "architecture": "MobileNetV2 + Custom Head",
+  "threshold": 0.5
+}
