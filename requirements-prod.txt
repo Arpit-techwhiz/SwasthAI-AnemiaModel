@@ -2,7 +2,7 @@
 # Usage: pip install -r requirements-prod.txt
 
 # Lightweight ML Inference
-tflite-runtime>=2.13.0
+tflite-runtime
 
 # Core utilities
 numpy>=1.24.0
