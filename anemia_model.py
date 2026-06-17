@@ -14,6 +14,11 @@ Clinical basis:
 import numpy as np
 import os
 import json
+import sys
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding='utf-8')
 
 
 
@@ -22,7 +27,7 @@ import json
 # ──────────────────────────────────────────────
 IMG_SIZE    = 224
 BATCH_SIZE  = 16
-EPOCHS      = 30
+EPOCHS      = 15
 LR          = 1e-4
 NUM_CLASSES = 1          # Binary: anemic / non-anemic
 MODEL_DIR   = "models"
@@ -452,13 +457,14 @@ class AnemiaDetector:
 if __name__ == "__main__":
     import sys
 
-    base_dir = "/home/claude/swasthai"
+    # Use dynamic path of the current file instead of hardcoded Unix path
+    base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # Generate synthetic dataset
-    print("📸 Generating synthetic training dataset...")
+    # Generate synthetic dataset (expand dataset size to 2000 total images)
+    print("📸 Generating expanded synthetic training dataset...")
     sys.path.insert(0, os.path.join(base_dir, "utils"))
     from generate_dataset import generate_dataset
-    generate_dataset(base_dir, n_train=300, n_val=80)
+    generate_dataset(base_dir, n_train=800, n_val=200)
 
     # Train model
     model, metrics = train_model(

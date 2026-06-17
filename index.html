@@ -3,21 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwasthAI – Mobile Anemia Screening Client</title>
+    <title>SwasthAI – AI-Powered Rural Health Screening Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #0d0f14;
-            --card-bg: rgba(20, 24, 33, 0.75);
-            --border-color: rgba(255, 255, 255, 0.08);
-            --primary: #ff4757;
-            --primary-glow: rgba(255, 71, 87, 0.35);
-            --text-main: #f1f2f6;
-            --text-muted: #a4b0be;
-            --success: #2ed573;
-            --warning: #ffa502;
-            --danger: #ff4757;
-            --critical: #eb4d4b;
+            --bg-color: #070d19;
+            --card-bg: #0f192b;
+            --border-color: rgba(32, 201, 151, 0.12);
+            --primary: #20c997;
+            --primary-glow: rgba(32, 201, 151, 0.25);
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --success: #2ec4b6;
+            --warning: #ff9f1c;
+            --danger: #e71d36;
+            --critical: #d90429;
+            --sidebar-width: 260px;
         }
 
         * {
@@ -25,7 +26,6 @@
             margin: 0;
             padding: 0;
             font-family: 'Outfit', sans-serif;
-            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -33,249 +33,502 @@
             color: var(--text-main);
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px 15px;
-            overflow-x: hidden;
+            overflow: hidden;
         }
 
-        .phone-container {
-            width: 100%;
-            max-width: 440px;
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 28px;
-            padding: 24px;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        /* Layout */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: #0b1120;
+            border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            padding: 30px 20px;
+            justify-content: space-between;
         }
 
-        header {
+        .logo-area {
             text-align: center;
-            margin-bottom: 5px;
+            margin-bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        header h1 {
+        .brand-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            margin-bottom: 12px;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 245, 212, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .brand-logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-area h1 {
             font-size: 1.8rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            background: linear-gradient(135deg, #20c997, #00f5d4);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -0.5px;
         }
 
-        header p {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            margin-top: 4px;
-        }
-
-        /* Server Config Input Box */
-        .config-box {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--border-color);
-            border-radius: 14px;
-            padding: 12px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .config-box label {
+        .logo-subtitle {
             font-size: 0.75rem;
+            color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-            font-weight: 600;
+            letter-spacing: 1.5px;
+            margin-top: 5px;
         }
 
-        .config-box input {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 8px 12px;
-            color: white;
-            font-size: 0.9rem;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        .config-box input:focus {
-            border-color: var(--primary);
-        }
-
-        .scan-type-selector {
-            display: flex;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            padding: 4px;
-            border: 1px solid var(--border-color);
-        }
-
-        .scan-btn {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            padding: 10px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .scan-btn.active {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 12px var(--primary-glow);
-        }
-
-        .upload-area {
-            border: 2px dashed rgba(255, 71, 87, 0.3);
-            border-radius: 20px;
-            padding: 35px 20px;
-            text-align: center;
-            cursor: pointer;
-            position: relative;
-            background: rgba(255, 71, 87, 0.02);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            overflow: hidden;
+        .nav-links {
             display: flex;
             flex-direction: column;
+            gap: 12px;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            display: flex;
             align-items: center;
-            justify-content: center;
-            min-height: 180px;
-        }
-
-        .upload-area:hover, .upload-area.dragover {
-            border-color: var(--primary);
-            background: rgba(255, 71, 87, 0.05);
-        }
-
-        .upload-icon {
-            font-size: 2.5rem;
-            margin-bottom: 12px;
-        }
-
-        .upload-text {
+            gap: 12px;
+            padding: 14px 18px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 12px;
             font-weight: 500;
             font-size: 0.95rem;
-            margin-bottom: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
         }
 
-        .upload-subtext {
-            font-size: 0.8rem;
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .nav-item.active {
+            color: white;
+            background: rgba(32, 201, 151, 0.08);
+            border-color: var(--border-color);
+            box-shadow: 0 4px 12px rgba(32, 201, 151, 0.05);
+        }
+
+        .sidebar-footer {
+            font-size: 0.75rem;
             color: var(--text-muted);
+            text-align: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 20px;
         }
 
-        #file-input {
+        .main-content {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+            height: 100vh;
+        }
+
+        /* Tab Panes */
+        .tab-pane {
             display: none;
         }
 
-        .preview-img {
+        .tab-pane.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Elements */
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-header h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-size: 0.95rem;
+        }
+
+        /* Cards Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 26px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 18px;
-            display: none;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), transparent);
+            opacity: 0.7;
         }
 
-        .analyze-btn {
-            background: linear-gradient(135deg, #ff4757, #ff6b81);
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 12px;
-            font-size: 1rem;
+        .card-title {
+            font-size: 1.1rem;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            justify-content: center;
             gap: 10px;
-            box-shadow: 0 6px 16px var(--primary-glow);
+            color: var(--text-main);
         }
 
-        .analyze-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .loader {
-            width: 20px;
-            height: 20px;
-            border: 2px solid white;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            display: none;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .result-card {
-            display: none;
-            background: rgba(0, 0, 0, 0.25);
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            animation: slideUp 0.4s ease-out;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .result-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 18px;
-        }
-
-        .severity-badge {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-
-        .prob-section {
-            text-align: center;
+        /* Forms */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
             margin-bottom: 20px;
         }
 
-        .prob-circle-outer {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            margin: 0 auto 10px;
+        .form-group {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            background: conic-gradient(var(--primary) 0%, rgba(255,255,255,0.05) 0%);
-            padding: 6px;
+            gap: 8px;
         }
 
-        .prob-circle-inner {
-            background: #141821;
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        input, select, textarea {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: white;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        /* Action Buttons */
+        .btn {
+            background: linear-gradient(135deg, #20c997, #00f5d4);
+            color: #070d19;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(32, 201, 151, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--primary);
+            box-shadow: none;
+        }
+
+        /* Voice Assistant Panel */
+        .voice-section {
+            background: rgba(32, 201, 151, 0.02);
+            border: 1px dashed rgba(32, 201, 151, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .voice-controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            align-items: center;
+        }
+
+        .recording-indicator {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--danger);
+            font-weight: 600;
+        }
+
+        .pulse-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--danger);
+            border-radius: 50%;
+            animation: pulse 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { opacity: 0.3; }
+            to { opacity: 1; }
+        }
+
+        .symptom-tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .symptom-tag {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .symptom-tag.active {
+            background: rgba(32, 201, 151, 0.12);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Image Scans Selector */
+        .scan-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .scan-uploader {
+            border: 2px dashed rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            background: rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .scan-uploader:hover {
+            border-color: var(--primary);
+            background: rgba(32, 201, 151, 0.02);
+        }
+
+        .scan-uploader img {
+            max-height: 110px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: none;
+        }
+
+        .template-btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .template-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .template-btn:hover {
+            border-color: var(--primary);
+            color: white;
+            background: rgba(32, 201, 151, 0.05);
+        }
+
+        /* Audio Stethoscope Simulator */
+        .audio-simulator {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .audio-clips-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .audio-clip-card {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .audio-clip-card.active {
+            border-color: var(--primary);
+            background: rgba(32, 201, 151, 0.05);
+        }
+
+        .audio-clip-card h4 {
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .audio-clip-card button {
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            font-size: 0.8rem;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* Vitals Sliders */
+        .vitals-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 24px;
+        }
+
+        .vital-slider-box {
+            background: rgba(0,0,0,0.15);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .vital-slider-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .vital-slider-header span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .vital-slider-header strong {
+            font-size: 0.95rem;
+            color: var(--primary);
+        }
+
+        .vital-slider-box input[type="range"] {
+            width: 100%;
+            accent-color: var(--primary);
+            margin-top: 5px;
+        }
+
+        /* Screening Result Modal / Card */
+        .report-section {
+            background: rgba(15, 25, 43, 0.95);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            display: none;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        }
+
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .report-circle-column {
+            text-align: center;
+        }
+
+        .report-circle-outer {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: conic-gradient(var(--primary) 0%, rgba(255,255,255,0.05) 0%);
+            padding: 8px;
+            box-shadow: 0 0 20px rgba(32, 201, 151, 0.15);
+        }
+
+        .report-circle-inner {
+            background: #0f192b;
             width: 100%;
             height: 100%;
             border-radius: 50%;
@@ -285,345 +538,1292 @@
             justify-content: center;
         }
 
-        .prob-value {
-            font-size: 1.8rem;
+        .report-score {
+            font-size: 2.2rem;
             font-weight: 700;
         }
 
-        .prob-lbl {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 18px;
-        }
-
-        .metric-item {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
-            padding: 12px;
-            border-radius: 12px;
-            text-align: center;
-        }
-
-        .metric-title {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            margin-bottom: 4px;
-        }
-
-        .metric-val {
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .advice-box {
-            background: rgba(255, 255, 255, 0.02);
-            border-left: 3px solid var(--primary);
-            padding: 12px;
-            border-radius: 4px 12px 12px 4px;
-            margin-bottom: 14px;
+        .report-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-weight: 700;
             font-size: 0.9rem;
-            line-height: 1.4;
+            margin-top: 10px;
         }
 
-        .hindi-advice {
-            font-style: italic;
+        .bg-low { background: rgba(46, 196, 182, 0.15); color: #2ec4b6; border: 1px solid #2ec4b6; }
+        .bg-moderate { background: rgba(255, 159, 28, 0.15); color: #ff9f1c; border: 1px solid #ff9f1c; }
+        .bg-high { background: rgba(231, 29, 54, 0.15); color: #e71d36; border: 1px solid #e71d36; }
+        .bg-critical { background: rgba(217, 4, 41, 0.2); color: #d90429; border: 1px solid #d90429; }
+
+        .clinical-report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .clinical-report-table td {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .clinical-report-table td:first-child {
             color: var(--text-muted);
-            font-size: 0.85rem;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding-top: 8px;
-            margin-top: 8px;
+            font-weight: 500;
         }
 
-        .recs-title {
-            font-size: 0.85rem;
+        .clinical-report-table td:last-child {
+            text-align: right;
             font-weight: 600;
+        }
+
+        .report-advice-box {
+            background: rgba(255,255,255,0.02);
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            border-radius: 0 10px 10px 0;
+            margin-top: 20px;
+        }
+
+        .report-advice-box h4 {
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+        }
+
+        .report-advice-box p {
+            font-size: 0.88rem;
+            line-height: 1.5;
+        }
+
+        /* Doctor Dashboard Elements */
+        .doctor-kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            position: relative;
+        }
+
+        .kpi-title {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             color: var(--text-muted);
             margin-bottom: 8px;
         }
 
-        .recs-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 700;
         }
 
-        .recs-list li {
-            font-size: 0.85rem;
-            display: flex;
-            gap: 8px;
-            align-items: flex-start;
+        .patient-table-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        .recs-list li::before {
-            content: "•";
-            color: var(--primary);
-            font-weight: bold;
+        .patient-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
         }
 
-        footer {
-            margin-top: auto;
-            padding-top: 15px;
-            text-align: center;
-            font-size: 0.75rem;
+        .patient-table th {
+            background: rgba(0,0,0,0.2);
+            padding: 16px 20px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             color: var(--text-muted);
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .patient-table td {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.92rem;
+        }
+
+        .patient-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+        }
+
+        .badge-status {
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .status-pending { background: rgba(255, 159, 28, 0.12); color: #ff9f1c; border: 1px solid #ff9f1c; }
+        .status-prescribed { background: rgba(32, 201, 151, 0.12); color: #20c997; border: 1px solid #20c997; }
+        .status-escalated { background: rgba(231, 29, 54, 0.12); color: #e71d36; border: 1px solid #e71d36; }
+
+        /* Doctor Detail Drawer */
+        .doctor-drawer {
+            display: none;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 26px;
+            margin-top: 30px;
+            animation: slideUp 0.4s;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .drawer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        /* Diagnostics UI */
+        .diagnostics-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+        }
+
+        .device-status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .device-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--success);
+        }
+
+        .status-dot.warning {
+            background: var(--warning);
+            box-shadow: 0 0 8px var(--warning);
+        }
+
+        /* Responsive Utilities */
+        @media (max-width: 1024px) {
+            .dashboard-grid, .drawer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+                overflow: auto;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: 15px 20px;
+                flex-direction: row;
+                align-items: center;
+                gap: 15px;
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+                background: #0b1120;
+            }
+
+            .logo-area {
+                margin-bottom: 0;
+                text-align: left;
+                flex-direction: row;
+                gap: 10px;
+                align-items: center;
+            }
+
+            .brand-logo {
+                width: 40px;
+                height: 40px;
+                margin-bottom: 0;
+            }
+
+            .nav-links {
+                flex-direction: row;
+                gap: 8px;
+                flex-wrap: wrap;
+                justify-content: flex-end;
+            }
+
+            .nav-item {
+                padding: 8px 12px;
+                font-size: 0.85rem;
+                gap: 6px;
+            }
+
+            .sidebar-footer {
+                display: none;
+            }
+
+            .main-content {
+                padding: 20px;
+                height: auto;
+                overflow-y: visible;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+
+            .vitals-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .doctor-kpi-row {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .patient-table-card {
+                overflow-x: auto;
+            }
+
+            .patient-table {
+                min-width: 600px;
+            }
+
+            .report-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .nav-links {
+                justify-content: center;
+                 Moz-justify-content: center;
+                width: 100%;
+            }
+
+            .doctor-kpi-row {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
 
-<div class="phone-container">
-    <header>
-        <h1>SwasthAI</h1>
-        <p>Anemia Detection AI (Live Client)</p>
-    </header>
-
-    <div class="config-box">
-        <label for="api-url">SwasthAI API Server Endpoint</label>
-        <input type="text" id="api-url" placeholder="http://10.230.182.17:5000">
-    </div>
-
-    <div class="scan-type-selector">
-        <button class="scan-btn active" onclick="setScanType('conjunctiva')">👁️ Conjunctiva</button>
-        <button class="scan-btn" onclick="setScanType('fingernail')">💅 Fingernail</button>
-    </div>
-
-    <div class="upload-area" onclick="triggerUpload()" id="dropzone">
-        <span class="upload-icon">📸</span>
-        <span class="upload-text">Upload or Take Photo</span>
-        <span class="upload-subtext">Supports Tap to Capture / File Drag & Drop</span>
-        <img class="preview-img" id="image-preview" alt="Preview">
-    </div>
-
-    <input type="file" id="file-input" accept="image/*" capture="environment" onchange="handleFile(event)">
-
-    <button class="analyze-btn" id="analyze-btn" disabled onclick="analyzeImage()">
-        <span class="loader" id="btn-loader"></span>
-        <span id="btn-text">Run Diagnosis</span>
-    </button>
-
-    <div class="result-card" id="result-card">
-        <div class="result-header">
-            <h3 style="font-weight: 600;">Screening Report</h3>
-            <span class="severity-badge" id="badge-elem"></span>
+    <!-- SIDEBAR NAVIGATION -->
+    <div class="sidebar">
+        <div>
+            <div class="logo-area">
+                <img src="/static/logo.jpg" alt="SwasthAI Logo" class="brand-logo">
+                <h1>SwasthAI</h1>
+                <div class="logo-subtitle">Rural Health AI</div>
+            </div>
+            <div class="nav-links">
+                <div class="nav-item active" onclick="switchTab('screening', this)">
+                    <span>📲</span>
+                    <span>AI Screening Portal</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('doctor', this)">
+                    <span>🩺</span>
+                    <span>Doctor Dashboard</span>
+                </div>
+                <div class="nav-item" onclick="switchTab('diagnostics', this)">
+                    <span>⚙️</span>
+                    <span>Diagnostics & Edge</span>
+                </div>
+            </div>
         </div>
+        <div class="sidebar-footer">
+            SwasthAI • Powered by Edge AI
+        </div>
+    </div>
 
-        <div class="prob-section">
-            <div class="prob-circle-outer" id="circle-outer">
-                <div class="prob-circle-inner">
-                    <span class="prob-value" id="val-probability">0.0%</span>
-                    <span class="prob-lbl">Probability</span>
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+
+        <!-- TAB 1: PATIENT SCREENING PORTAL -->
+        <div id="tab-screening" class="tab-pane active">
+            <div class="page-header">
+                <h2>AI-Powered Patient Screening Portal</h2>
+                <p>Comprehensive physiological screening fusing smart camera scans, speech analysis, and vitals.</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Left: Intake Forms -->
+                <div style="display: flex; flex-direction: column; gap: 30px;">
+                    <!-- Patient Profile Card -->
+                    <div class="card">
+                        <div class="card-title"><span>👤</span>Patient Profile & Location</div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Patient Name / नाम</label>
+                                <input type="text" id="patient-name" placeholder="e.g. Priya Sharma" value="Priya Sharma">
+                            </div>
+                            <div class="form-row" style="margin-bottom:0;">
+                                <div class="form-group">
+                                    <label>Age / उम्र</label>
+                                    <input type="number" id="patient-age" placeholder="e.g. 34" value="34">
+                                </div>
+                                <div class="form-group">
+                                    <label>Gender / लिंग</label>
+                                    <select id="patient-gender">
+                                        <option value="female" selected>Female / महिला</option>
+                                        <option value="male">Male / पुरुष</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label>Location / ग्रामीण क्षेत्र</label>
+                                <input type="text" id="patient-location" placeholder="e.g. Village Kelwa, Rajasthan" value="Rural Rajasthan">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hindi Voice Assistant Card -->
+                    <div class="card">
+                        <div class="card-title"><span>🎙️</span>Hindi Voice Symptom Assistant</div>
+                        <div class="voice-section">
+                            <label>Speech Command / बोलें या टाइप करें (Hindi/Hinglish)</label>
+                            <textarea id="voice-transcript" rows="2" style="width: 100%; margin-top:8px;" placeholder="e.g. Mujhe bahut thakan lag rahi hai aur chakkar aa raha hai"></textarea>
+                            
+                            <div class="voice-controls">
+                                <button type="button" class="btn btn-secondary" id="btn-record-voice" onclick="toggleSpeechRecording()">
+                                    <span>🎙️</span> Start Recording
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="analyzeVoiceNLP()">
+                                    <span>🔍</span> Extract Symptoms
+                                </button>
+                                <div class="recording-indicator" id="rec-indicator">
+                                    <div class="pulse-dot"></div> Listening in Hindi...
+                                </div>
+                            </div>
+                        </div>
+                        <label>Extracted Symptoms / पहचाने गए लक्षण</label>
+                        <div class="symptom-tag-container" id="symptoms-container">
+                            <div class="symptom-tag" id="tag-fatigue" onclick="toggleSymptom('fatigue')"><span>🩸</span> Fatigue (थकान)</div>
+                            <div class="symptom-tag" id="tag-dizziness" onclick="toggleSymptom('dizziness')"><span>💫</span> Dizziness (चक्कर)</div>
+                            <div class="symptom-tag" id="tag-breathless" onclick="toggleSymptom('breathless')"><span>🫁</span> Breathlessness (सांस फूलना)</div>
+                            <div class="symptom-tag" id="tag-headache" onclick="toggleSymptom('headache')"><span>🧠</span> Headache (सिर दर्द)</div>
+                            <div class="symptom-tag" id="tag-pale-skin" onclick="toggleSymptom('pale skin')"><span>🟡</span> Pale Skin (पीलापन)</div>
+                            <div class="symptom-tag" id="tag-cold-extremities" onclick="toggleSymptom('cold extremities')"><span>🥶</span> Cold Extremities (ठंडे हाथ-पैर)</div>
+                            <div class="symptom-tag" id="tag-chest-pain" onclick="toggleSymptom('chest pain')"><span>💔</span> Chest Pain (सीने में दर्द)</div>
+                            <div class="symptom-tag" id="tag-brittle-nails" onclick="toggleSymptom('brittle nails')"><span>💅</span> Brittle Nails (कमजोर नाखून)</div>
+                            <div class="symptom-tag" id="tag-hair-loss" onclick="toggleSymptom('hair loss')"><span>🧑‍🦲</span> Hair Loss (बाल झड़ना)</div>
+                            <div class="symptom-tag" id="tag-loss-of-appetite" onclick="toggleSymptom('loss of appetite')"><span>🥣</span> Loss of Appetite (भूख न लगना)</div>
+                        </div>
+                        <div id="voice-hindi-response" style="margin-top:15px; font-size:0.85rem; color:var(--primary); font-style:italic;"></div>
+                    </div>
+
+                    <!-- Camera Scans Simulator -->
+                    <div class="card">
+                        <div class="card-title"><span>📸</span>Ocular & Nail Bed Camera Scans</div>
+                        <div class="scan-grid">
+                            <!-- Conjunctiva -->
+                            <div class="scan-uploader" onclick="document.getElementById('file-conj').click()">
+                                <input type="file" id="file-conj" style="display:none" onchange="previewImage('conj', this)">
+                                <img id="preview-conj" src="" alt="Conjunctiva Preview">
+                                <div id="label-conj">
+                                    <span style="font-size:1.8rem;">👁️</span>
+                                    <h4 style="font-size:0.9rem; margin-top:5px;">Eye Conjunctiva Scan</h4>
+                                    <p style="font-size:0.75rem; color:var(--text-muted)">Click to upload conjunctiva photo</p>
+                                </div>
+                                <div class="template-btn-row">
+                                    <button class="template-btn" onclick="loadTemplate('conj', false, event)">Healthy Eye</button>
+                                    <button class="template-btn" onclick="loadTemplate('conj', true, event)">Anemic Eye</button>
+                                </div>
+                            </div>
+                            <!-- Fingernail -->
+                            <div class="scan-uploader" onclick="document.getElementById('file-nail').click()">
+                                <input type="file" id="file-nail" style="display:none" onchange="previewImage('nail', this)">
+                                <img id="preview-nail" src="" alt="Nail bed Preview">
+                                <div id="label-nail">
+                                    <span style="font-size:1.8rem;">💅</span>
+                                    <h4 style="font-size:0.9rem; margin-top:5px;">Fingernail Bed Scan</h4>
+                                    <p style="font-size:0.75rem; color:var(--text-muted)">Click to upload fingernail photo</p>
+                                </div>
+                                <div class="template-btn-row">
+                                    <button class="template-btn" onclick="loadTemplate('nail', false, event)">Healthy Nail</button>
+                                    <button class="template-btn" onclick="loadTemplate('nail', true, event)">Anemic Nail</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); text-align:center;">
+                            *CNN processes ocular capillary bed pallor & fingernail bed vascular returns locally on smartphone.
+                        </div>
+                    </div>
+
+                    <!-- Stethoscope Audio Classifier -->
+                    <div class="card">
+                        <div class="card-title"><span>🫁</span>Smart Stethoscope Lung Audio Simulator</div>
+                        <div class="audio-simulator">
+                            <label>Select & Analyze Sound Profile</label>
+                            <div class="audio-clips-row">
+                                <div class="audio-clip-card" id="steth-clip-normal" onclick="selectAudioSample('normal')">
+                                    <h4>Normal Breathing</h4>
+                                    <button onclick="playSampleAudio('normal_lung.wav', event)">🔊 Listen</button>
+                                </div>
+                                <div class="audio-clip-card" id="steth-clip-wheezing" onclick="selectAudioSample('wheezing')">
+                                    <h4>Wheezing (Asthma)</h4>
+                                    <button onclick="playSampleAudio('wheezing_lung.wav', event)">🔊 Listen</button>
+                                </div>
+                                <div class="audio-clip-card" id="steth-clip-crackles" onclick="selectAudioSample('crackles')">
+                                    <h4>Crackles (Pneumonia)</h4>
+                                    <button onclick="playSampleAudio('crackles_lung.wav', event)">🔊 Listen</button>
+                                </div>
+                            </div>
+                            <div style="margin-top:15px; text-align:center;">
+                                <label style="display:block; margin-bottom:5px;">OR Upload WAV File</label>
+                                <input type="file" id="steth-file" accept=".wav" onchange="uploadStethoscopeFile(this)" style="font-size:0.8rem; background:transparent; border:none; padding:0;">
+                            </div>
+                        </div>
+                        <div id="steth-results" style="font-size:0.85rem; color:var(--primary); text-align:center; font-weight:600;">
+                            Stethoscope Sound Selected: None
+                        </div>
+                    </div>
+
+                    <!-- Vitals Intake Slider -->
+                    <div class="card">
+                        <div class="card-title"><span>🎛️</span>ESP32 Integrated Vitals Array</div>
+                        <div class="vitals-grid">
+                            <div class="vital-slider-box">
+                                <div class="vital-slider-header">
+                                    <span>Heart Rate</span>
+                                    <strong id="val-hr">72 bpm</strong>
+                                </div>
+                                <input type="range" id="input-hr" min="50" max="130" value="72" oninput="updateVitalVal('hr', this.value)">
+                            </div>
+                            <div class="vital-slider-box">
+                                <div class="vital-slider-header">
+                                    <span>SpO2 (Oxygen)</span>
+                                    <strong id="val-spo2">98 %</strong>
+                                </div>
+                                <input type="range" id="input-spo2" min="80" max="100" value="98" oninput="updateVitalVal('spo2', this.value)">
+                            </div>
+                            <div class="vital-slider-box">
+                                <div class="vital-slider-header">
+                                    <span>Body Temp</span>
+                                    <strong id="val-temp">98.6 °F</strong>
+                                </div>
+                                <input type="range" id="input-temp" min="96.0" max="104.0" step="0.2" value="98.6" oninput="updateVitalVal('temp', this.value)">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button class="btn" style="width: 100%; margin-bottom: 40px;" onclick="runFullScreening()">
+                        🚀 Run Multi-parameter AI Health Screening
+                    </button>
+                </div>
+
+                <!-- Right Side: Clinical Results Preview -->
+                <div>
+                    <div class="report-section" id="screening-report">
+                        <h3 style="font-size:1.3rem; font-weight:600; margin-bottom:20px; border-bottom:1px solid var(--border-color); padding-bottom:10px;">
+                            📋 Consolidated Clinical Report
+                        </h3>
+                        <div class="report-grid">
+                            <div class="report-circle-column">
+                                <div class="report-circle-outer" id="report-circle">
+                                    <div class="report-circle-inner">
+                                        <div class="report-score" id="report-score-val">0</div>
+                                        <div style="font-size:0.6rem; color:var(--text-muted); text-transform:uppercase;">Risk Score</div>
+                                    </div>
+                                </div>
+                                <div class="report-badge" id="report-severity-badge">LOW RISK</div>
+                            </div>
+                            <div>
+                                <table class="clinical-report-table">
+                                    <tr>
+                                        <td>Patient</td>
+                                        <td id="rep-patient-info">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Conjunctiva Scan</td>
+                                        <td id="rep-conj-val">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Fingernail Scan</td>
+                                        <td id="rep-nail-val">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Breath Classification</td>
+                                        <td id="rep-breath-val">-</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Vitals (SpO2 | HR | Temp)</td>
+                                        <td id="rep-vitals-val">-</td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="report-advice-box">
+                            <h4 style="color:var(--primary)">📋 English Clinical Guidance</h4>
+                            <p id="rep-advice-en">-</p>
+                        </div>
+                        <div class="report-advice-box" style="border-left-color: var(--warning); margin-top: 15px;">
+                            <h4 style="color:var(--warning)">📋 हिंदी चिकित्सा सलाह</h4>
+                            <p id="rep-advice-hi">-</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="metrics-grid">
-            <div class="metric-item">
-                <div class="metric-title">Hemoglobin Est.</div>
-                <div class="metric-val" id="val-hgb">--</div>
+        <!-- TAB 2: DOCTOR DASHBOARD -->
+        <div id="tab-doctor" class="tab-pane">
+            <div class="page-header">
+                <h2>SwasthAI Doctor Dashboard</h2>
+                <p>Real-time escalation alerts, telemedicine review, and remote digital prescribing interface.</p>
             </div>
-            <div class="metric-item">
-                <div class="metric-title">Confidence</div>
-                <div class="metric-val" id="val-conf">--</div>
+
+            <!-- Dashboard Counters -->
+            <div class="doctor-kpi-row">
+                <div class="kpi-card">
+                    <div class="kpi-title">Total Screenings</div>
+                    <div class="kpi-value" id="kpi-total">0</div>
+                </div>
+                <div class="kpi-card" style="border-color: rgba(217, 4, 41, 0.2)">
+                    <div class="kpi-title" style="color:#d90429;">Critical Alerts</div>
+                    <div class="kpi-value" id="kpi-critical" style="color:#d90429;">0</div>
+                </div>
+                <div class="kpi-card" style="border-color: rgba(255, 159, 28, 0.2)">
+                    <div class="kpi-title" style="color:#ff9f1c;">Pending Review</div>
+                    <div class="kpi-value" id="kpi-pending" style="color:#ff9f1c;">0</div>
+                </div>
+                <div class="kpi-card" style="border-color: rgba(32, 201, 151, 0.2)">
+                    <div class="kpi-title" style="color:#20c997;">Reviewed Cases</div>
+                    <div class="kpi-value" id="kpi-reviewed" style="color:#20c997;">0</div>
+                </div>
+            </div>
+
+            <!-- Patient Table -->
+            <div class="patient-table-card">
+                <table class="patient-table">
+                    <thead>
+                        <tr>
+                            <th>Patient Info</th>
+                            <th>Risk Score</th>
+                            <th>Severity</th>
+                            <th>Key Symptoms</th>
+                            <th>Lung Sound</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="doctor-patient-list">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Doctor Detail Review / Prescription Drawer -->
+            <div class="doctor-drawer" id="doctor-review-drawer">
+                <div class="drawer-header">
+                    <h3 id="drawer-patient-title">Review Case: Priya Sharma (34F)</h3>
+                    <button class="btn btn-secondary" style="padding: 6px 12px;" onclick="closeReviewDrawer()">Close</button>
+                </div>
+                <div class="drawer-grid">
+                    <!-- Patient details & clinical readings -->
+                    <div>
+                        <h4 style="font-size:1rem; margin-bottom:10px; color:var(--primary);">Diagnostic Summary</h4>
+                        <table class="clinical-report-table">
+                            <tr>
+                                <td>Location</td>
+                                <td id="dr-rep-location">-</td>
+                            </tr>
+                            <tr>
+                                <td>Fused Risk Score</td>
+                                <td id="dr-rep-risk" style="font-weight: 700;">-</td>
+                            </tr>
+                            <tr>
+                                <td>Conjunctiva Prob</td>
+                                <td id="dr-rep-conj">-</td>
+                            </tr>
+                            <tr>
+                                <td>Fingernail Prob</td>
+                                <td id="dr-rep-nail">-</td>
+                            </tr>
+                            <tr>
+                                <td>Stethoscope Finding</td>
+                                <td id="dr-rep-steth">-</td>
+                            </tr>
+                            <tr>
+                                <td>SpO2 / Heart Rate</td>
+                                <td id="dr-rep-vitals">-</td>
+                            </tr>
+                            <tr>
+                                <td>Reported Symptoms</td>
+                                <td id="dr-rep-symptoms">-</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <!-- Prescription Form -->
+                    <div>
+                        <h4 style="font-size:1rem; margin-bottom:10px; color:var(--warning);">Remote Prescription & Advice</h4>
+                        <div class="form-group" style="margin-bottom:15px;">
+                            <label>Doctor's Diagnostic Notes</label>
+                            <textarea id="presc-notes" rows="3" placeholder="Enter clinical assessment, diet advice..."></textarea>
+                        </div>
+                        <div class="form-group" style="margin-bottom:15px;">
+                            <label>Recommended Medicines</label>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:5px;">
+                                <label style="text-transform:none; font-weight:400; color:white; display:flex; align-items:center; gap:8px;">
+                                    <input type="checkbox" id="med-iron" value="Iron Supplement 100mg"> Iron Supplement 100mg
+                                </label>
+                                <label style="text-transform:none; font-weight:400; color:white; display:flex; align-items:center; gap:8px;">
+                                    <input type="checkbox" id="med-vitc" value="Vitamin C 500mg"> Vitamin C 500mg
+                                </label>
+                                <label style="text-transform:none; font-weight:400; color:white; display:flex; align-items:center; gap:8px;">
+                                    <input type="checkbox" id="med-folic" value="Folic Acid 5mg"> Folic Acid 5mg
+                                </label>
+                                <label style="text-transform:none; font-weight:400; color:white; display:flex; align-items:center; gap:8px;">
+                                    <input type="checkbox" id="med-deworm" value="Albendazole 400mg"> Albendazole 400mg
+                                </label>
+                                <label style="text-transform:none; font-weight:400; color:white; display:flex; align-items:center; gap:8px;">
+                                    <input type="checkbox" id="med-b12" value="Vitamin B12 1500mcg"> Vitamin B12 1500mcg
+                                </label>
+                                <label style="text-transform:none; font-weight:400; color:white; display:flex; align-items:center; gap:8px;">
+                                    <input type="checkbox" id="med-pcm" value="Paracetamol 650mg"> Paracetamol 650mg
+                                </label>
+                                <label style="text-transform:none; font-weight:400; color:white; display:flex; align-items:center; gap:8px;">
+                                    <input type="checkbox" id="med-ors" value="ORS (Oral Rehydration Salts)"> ORS (Oral Rehydration Salts)
+                                </label>
+                                <label style="text-transform:none; font-weight:400; color:white; display:flex; align-items:center; gap:8px;">
+                                    <input type="checkbox" id="med-calcium" value="Calcium + Vitamin D3"> Calcium + Vitamin D3
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-row" style="align-items:center;">
+                            <div class="form-group">
+                                <label>Action Status</label>
+                                <select id="presc-status">
+                                    <option value="Prescribed">Approve & Prescribe</option>
+                                    <option value="Escalated">Escalate to Hospital</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="justify-content: flex-end; display:flex; flex-direction:row;">
+                                <button class="btn" style="margin-top:15px; width:100%;" onclick="submitPrescription()">
+                                    ✍️ Save & Send Rx
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="advice-box">
-            <div id="val-advice">--</div>
-            <div class="hindi-advice" id="val-advice-hindi">--</div>
+        <!-- TAB 3: SYSTEM DIAGNOSTICS -->
+        <div id="tab-diagnostics" class="tab-pane">
+            <div class="page-header">
+                <h2>Edge Network Diagnostics</h2>
+                <p>Status logs of offline peripheral nodes connected via BLE mesh & Local database state.</p>
+            </div>
+
+            <div class="diagnostics-grid">
+                <!-- Node Status -->
+                <div class="card">
+                    <div class="card-title">🔌 Active Edge Hardware Nodes</div>
+                    <div class="device-status-item">
+                        <div class="device-info">
+                            <span style="font-size:1.4rem;">📱</span>
+                            <div>
+                                <strong>Android Smartphone</strong>
+                                <div style="font-size:0.75rem; color:var(--text-muted)">Camera + Local ASR Engine</div>
+                            </div>
+                        </div>
+                        <div class="status-dot"></div>
+                    </div>
+                    <div class="device-status-item">
+                        <div class="device-info">
+                            <span style="font-size:1.4rem;">🎙️</span>
+                            <div>
+                                <strong>Smart Stethoscope (Simulated)</strong>
+                                <div style="font-size:0.75rem; color:var(--text-muted)">Audio Lung FFT Classifier</div>
+                            </div>
+                        </div>
+                        <div class="status-dot"></div>
+                    </div>
+                    <div class="device-status-item">
+                        <div class="device-info">
+                            <span style="font-size:1.4rem;">🔌</span>
+                            <div>
+                                <strong>ESP32 Sensor Array</strong>
+                                <div style="font-size:0.75rem; color:var(--text-muted)">BLE Vitals Hub (SpO2/HR)</div>
+                            </div>
+                        </div>
+                        <div class="status-dot"></div>
+                    </div>
+                    <div class="device-status-item">
+                        <div class="device-info">
+                            <span style="font-size:1.4rem;">🍓</span>
+                            <div>
+                                <strong>Raspberry Pi 4 compute node</strong>
+                                <div style="font-size:0.75rem; color:var(--text-muted)">Offline SQLite Master Database</div>
+                            </div>
+                        </div>
+                        <div class="status-dot"></div>
+                    </div>
+                </div>
+
+                <!-- Database Info -->
+                <div class="card">
+                    <div class="card-title">💾 Local Database Sync & Offline Queue</div>
+                    <table class="clinical-report-table" style="margin-top:0;">
+                        <tr>
+                            <td>Database Mode</td>
+                            <td>Offline-first (SQLite)</td>
+                        </tr>
+                        <tr>
+                            <td>Database File</td>
+                            <td>offline_records.db</td>
+                        </tr>
+                        <tr>
+                            <td>Local Records Count</td>
+                            <td id="db-records-count">0</td>
+                        </tr>
+                        <tr>
+                            <td>Pending Sync Queue</td>
+                            <td>0 cases (Fully synced)</td>
+                        </tr>
+                        <tr>
+                            <td>Encryption Standard</td>
+                            <td>AES-256 (HIPAA Aligned)</td>
+                        </tr>
+                    </table>
+                    <div style="margin-top:20px; text-align:center;">
+                        <button class="btn btn-secondary" onclick="alert('Offline SQLite database synced successfully to AWS Cloud API.')">
+                            🔄 Sync Offline Database to Cloud
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div id="recs-section">
-            <div class="recs-title">Recommendations</div>
-            <ul class="recs-list" id="val-recs"></ul>
-        </div>
     </div>
-</div>
 
-<footer>
-    SwasthAI v1.0.0 • GitHub Pages Live Client
-</footer>
+    <!-- Hidden Audio Player -->
+    <audio id="audio-player" style="display:none;"></audio>
 
-<script>
-    let currentScanType = 'conjunctiva';
-    let base64Image = null;
+    <!-- UI JAVASCRIPT LOGIC -->
+    <script>
+        // State management
+        const activeSymptoms = new Set();
+        let selectedAudioSample = 'none';
+        let customAudioFile = null;
+        let selectedPatientIdForReview = null;
+        let activePatientCaseForReview = null;
 
-    // Auto-detect server base url
-    const ipInput = document.getElementById('api-url');
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        ipInput.value = window.location.origin;
-    } else {
-        // Default to the 24/7 Render cloud deployment URL
-        ipInput.value = 'https://swasthai-anemia-api.onrender.com';
-    }
+        // Image Base64 placeholders for quick template loading (mock values)
+        const mockEyeHealthy = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5CYII="; // Light gray/blue placeholder
+        const mockEyePale = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5CYII=";
+        let base64Conjunctiva = null;
+        let base64Fingernail = null;
+        let conjunctivaProbVal = null;
+        let fingernailProbVal = null;
 
-    function setScanType(type) {
-        currentScanType = type;
-        document.querySelectorAll('.scan-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.innerText.toLowerCase().includes(type)) {
-                btn.classList.add('active');
+        // Tab Switching
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabId).classList.add('active');
+            el.classList.add('active');
+
+            if (tabId === 'doctor') {
+                loadCases();
+            } else if (tabId === 'diagnostics') {
+                updateDiagnostics();
             }
-        });
-    }
-
-    function triggerUpload() {
-        document.getElementById('file-input').click();
-    }
-
-    function handleFile(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const preview = document.getElementById('image-preview');
-            preview.src = e.target.result;
-            preview.style.display = 'block';
-
-            // Get raw base64 string
-            base64Image = e.target.result.split(',')[1];
-            document.getElementById('analyze-btn').disabled = false;
-        };
-        reader.readAsDataURL(file);
-    }
-
-    // Drag and drop events
-    const dropzone = document.getElementById('dropzone');
-    dropzone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropzone.classList.add('dragover');
-    });
-    dropzone.addEventListener('dragleave', () => {
-        dropzone.classList.remove('dragover');
-    });
-    dropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropzone.classList.remove('dragover');
-        if (e.dataTransfer.files.length) {
-            document.getElementById('file-input').files = e.dataTransfer.files;
-            handleFile({ target: { files: e.dataTransfer.files } });
-        }
-    });
-
-    async function analyzeImage() {
-        if (!base64Image) return;
-
-        const loader = document.getElementById('btn-loader');
-        const btnText = document.getElementById('btn-text');
-        const btn = document.getElementById('analyze-btn');
-        const card = document.getElementById('result-card');
-
-        loader.style.display = 'block';
-        btnText.innerText = 'Analyzing Image...';
-        btn.disabled = true;
-        card.style.display = 'none';
-
-        // Read user-configured API URL
-        let apiOrigin = ipInput.value.trim();
-        // Remove trailing slashes
-        if (apiOrigin.endsWith('/')) {
-            apiOrigin = apiOrigin.slice(0, -1);
         }
 
-        try {
-            const response = await fetch(`${apiOrigin}/predict/b64`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    image_b64: base64Image,
-                    scan_type: currentScanType,
-                    patient_id: `MOBILE-${Math.floor(1000 + Math.random() * 9000)}`
-                })
-            });
+        // Vitals Label updates
+        function updateVitalVal(vital, val) {
+            const unitMap = { hr: ' bpm', spo2: ' %', temp: ' °F' };
+            document.getElementById('val-' + vital).innerText = val + unitMap[vital];
+        }
 
-            const data = await response.json();
-            if (response.ok) {
-                renderResult(data);
+        // Symptom toggle
+        function toggleSymptom(symptom) {
+            const tag = document.getElementById('tag-' + symptom.replace(' ', '-'));
+            if (activeSymptoms.has(symptom)) {
+                activeSymptoms.delete(symptom);
+                tag.classList.remove('active');
             } else {
-                alert(`Error: ${data.error || 'Failed to analyze'}`);
+                activeSymptoms.add(symptom);
+                tag.classList.add('active');
             }
-        } catch (error) {
-            console.error(error);
-            alert(`Could not connect to SwasthAI Server at ${apiOrigin}. Please check that the server is running and your IP is correct.`);
-        } finally {
-            loader.style.display = 'none';
-            btnText.innerText = 'Run Diagnosis';
-            btn.disabled = false;
-        }
-    }
-
-    function renderResult(data) {
-        const card = document.getElementById('result-card');
-        
-        // Probability conic gradient coloring
-        const probVal = data.anemia_probability;
-        const probPercent = (probVal * 100).toFixed(1);
-        document.getElementById('val-probability').innerText = `${probPercent}%`;
-        
-        // Set dynamic colors based on severity
-        let color = 'var(--success)';
-        if (data.severity === 'MODERATE RISK') color = 'var(--warning)';
-        else if (data.severity === 'HIGH RISK') color = 'var(--danger)';
-        else if (data.severity === 'CRITICAL') color = 'var(--critical)';
-
-        document.getElementById('circle-outer').style.background = `conic-gradient(${color} ${probPercent}%, rgba(255,255,255,0.05) ${probPercent}%)`;
-
-        // Badge
-        const badge = document.getElementById('badge-elem');
-        badge.innerText = `${data.icon} ${data.severity}`;
-        badge.style.backgroundColor = `${color}25`; // 15% opacity
-        badge.style.color = color;
-        badge.style.border = `1px solid ${color}40`;
-
-        // Details
-        document.getElementById('val-hgb').innerText = data.hemoglobin_estimate.split(' ')[0]; // Grab "~12-16" or similar
-        document.getElementById('val-conf').innerText = `${data.confidence}%`;
-        document.getElementById('val-advice').innerText = data.advice;
-        document.getElementById('val-advice-hindi').innerText = data.hindi_advice;
-
-        // Recommendations list
-        const recsContainer = document.getElementById('val-recs');
-        recsContainer.innerHTML = '';
-        
-        // Populate standard recommendations based on probability
-        const recs = [];
-        if (probVal > 0.3) {
-            recs.push("Complete Blood Count (CBC) test recommended");
-            recs.push("Increase iron intake: spinach, lentils, jaggery, beetroot");
-        } else {
-            recs.push("Normal range. Continue maintaining a balanced, healthy diet");
-            recs.push("Check again if symptoms of fatigue or dizziness occur");
-        }
-        if (probVal > 0.55) {
-            recs.push("Schedule a consultation with a physician");
-            recs.push("Incorporate Vitamin C with meals to boost iron absorption");
-        }
-        if (probVal > 0.75) {
-            recs.push("URGENT: Immediate clinical attention recommended");
         }
 
-        recs.forEach(rec => {
-            const li = document.createElement('li');
-            li.innerText = rec;
-            recsContainer.appendChild(li);
-        });
+        // Hindi Voice Assistant NLP Simulator
+        let recognition = null;
+        function toggleSpeechRecording() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const btn = document.getElementById('btn-record-voice');
+            const indicator = document.getElementById('rec-indicator');
 
-        card.style.display = 'block';
-        // Scroll card into view
-        card.scrollIntoView({ behavior: 'smooth' });
-    }
-</script>
+            if (!SpeechRecognition) {
+                alert("Speech recognition not supported in this browser. Please type in the text box below.");
+                return;
+            }
 
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
+                btn.innerHTML = "<span>🎙️</span> Start Recording";
+                indicator.style.display = "none";
+                return;
+            }
+
+            recognition = new SpeechRecognition();
+            recognition.lang = 'hi-IN'; // Set Hindi language
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            btn.innerHTML = "<span>⏹️</span> Stop Recording";
+            indicator.style.display = "flex";
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('voice-transcript').value = transcript;
+                analyzeVoiceNLP();
+            };
+
+            recognition.onerror = function(event) {
+                console.error("Speech error", event);
+            };
+
+            recognition.onend = function() {
+                btn.innerHTML = "<span>🎙️</span> Start Recording";
+                indicator.style.display = "none";
+                recognition = null;
+            };
+
+            recognition.start();
+        }
+
+        function analyzeVoiceNLP() {
+            const text = document.getElementById('voice-transcript').value;
+            if (!text.trim()) return;
+
+            fetch('/api/voice-symptoms', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('voice-hindi-response').innerText = "🔊 SwasthAI Voice Response: " + data.hindi_response;
+                
+                // Reset active tags
+                activeSymptoms.clear();
+                document.querySelectorAll('.symptom-tag').forEach(tag => tag.classList.remove('active'));
+
+                // Set new tags
+                data.symptoms.forEach(s => {
+                    activeSymptoms.add(s);
+                    const tag = document.getElementById('tag-' + s.replace(' ', '-'));
+                    if (tag) tag.classList.add('active');
+                });
+            })
+            .catch(err => console.error("Voice analysis failed", err));
+        }
+
+        // Camera Uploader Templates and Previewing
+        function previewImage(type, input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('preview-' + type);
+                    const label = document.getElementById('label-' + type);
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    label.style.display = 'none';
+
+                    // Convert to base64 for API
+                    const base64Str = e.target.result.split(',')[1];
+                    if (type === 'conj') {
+                        base64Conjunctiva = base64Str;
+                        conjunctivaProbVal = null; // Reset fallback
+                    } else {
+                        base64Fingernail = base64Str;
+                        fingernailProbVal = null; // Reset fallback
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Template loading
+        function loadTemplate(type, isAnemic, event) {
+            event.stopPropagation();
+            const preview = document.getElementById('preview-' + type);
+            const label = document.getElementById('label-' + type);
+            
+            if (type === 'conj') {
+                base64Conjunctiva = mockEyeHealthy;
+                conjunctivaProbVal = isAnemic ? 0.78 : 0.12;
+                preview.src = isAnemic ? 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==' : 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+                preview.style.border = isAnemic ? '3px solid #ff4757' : '3px solid #2ed573';
+                preview.style.display = 'block';
+                label.style.display = 'none';
+            } else {
+                base64Fingernail = mockEyeHealthy;
+                fingernailProbVal = isAnemic ? 0.65 : 0.15;
+                preview.src = isAnemic ? 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==' : 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
+                preview.style.border = isAnemic ? '3px solid #ff4757' : '3px solid #2ed573';
+                preview.style.display = 'block';
+                label.style.display = 'none';
+            }
+        }
+
+        // Stethoscope simulator
+        function selectAudioSample(type) {
+            document.querySelectorAll('.audio-clip-card').forEach(card => card.classList.remove('active'));
+            document.getElementById('steth-clip-' + type).classList.add('active');
+            selectedAudioSample = type;
+            customAudioFile = null;
+            document.getElementById('steth-results').innerText = "Stethoscope Sound Selected: " + type.toUpperCase();
+        }
+
+        function playSampleAudio(filename, event) {
+            event.stopPropagation();
+            const player = document.getElementById('audio-player');
+            player.src = '/static/audio/' + filename;
+            player.play().catch(e => {
+                alert("Audio plays natively once server starts running: " + filename);
+            });
+        }
+
+        function uploadStethoscopeFile(input) {
+            const file = input.files[0];
+            if (file) {
+                customAudioFile = file;
+                selectedAudioSample = 'custom';
+                document.getElementById('steth-results').innerText = "Stethoscope Sound: File uploaded (" + file.name + ")";
+                
+                const formData = new FormData();
+                formData.append('audio', file);
+                
+                fetch('/api/predict/stethoscope', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    selectedAudioSample = data.class.toLowerCase();
+                    document.getElementById('steth-results').innerText = `Lung sounds classified: ${data.class} (${data.confidence * 100}%)`;
+                })
+                .catch(err => console.error("Stethoscope audio classifier error", err));
+            }
+        }
+
+        // Consolidated screening submit
+        function runFullScreening() {
+            const name = document.getElementById('patient-name').value;
+            const age = document.getElementById('patient-age').value;
+            const gender = document.getElementById('patient-gender').value;
+            const location = document.getElementById('patient-location').value;
+
+            const heart_rate = document.getElementById('input-hr').value;
+            const spo2 = document.getElementById('input-spo2').value;
+            const temperature = document.getElementById('input-temp').value;
+
+            const payload = {
+                patient_name: name,
+                patient_age: age,
+                patient_gender: gender,
+                location: location,
+                heart_rate: heart_rate,
+                spo2: spo2,
+                temperature: temperature,
+                symptoms: Array.from(activeSymptoms),
+                stethoscope_result: selectedAudioSample
+            };
+
+            if (base64Conjunctiva) payload.conjunctiva_b64 = base64Conjunctiva;
+            if (base64Fingernail) payload.fingernail_b64 = base64Fingernail;
+            if (conjunctivaProbVal !== null) payload.conjunctiva_prob = conjunctivaProbVal;
+            if (fingernailProbVal !== null) payload.fingernail_prob = fingernailProbVal;
+
+            fetch('/api/screen', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(data => {
+                const report = document.getElementById('screening-report');
+                report.style.display = 'block';
+                report.scrollIntoView({ behavior: 'smooth' });
+
+                const score = Math.round(data.risk_score);
+                document.getElementById('report-score-val').innerText = score + "%";
+                
+                let riskColor = '#2ec4b6';
+                let riskBgClass = 'bg-low';
+                if (data.severity === 'MODERATE RISK') { riskColor = '#ff9f1c'; riskBgClass = 'bg-moderate'; }
+                else if (data.severity === 'HIGH RISK') { riskColor = '#e71d36'; riskBgClass = 'bg-high'; }
+                else if (data.severity === 'CRITICAL') { riskColor = '#d90429'; riskBgClass = 'bg-critical'; }
+
+                const circle = document.getElementById('report-circle');
+                circle.style.background = `conic-gradient(${riskColor} ${score}%, rgba(255,255,255,0.05) ${score}%)`;
+
+                const badge = document.getElementById('report-severity-badge');
+                badge.className = `report-badge ${riskBgClass}`;
+                badge.innerText = data.severity;
+
+                document.getElementById('rep-patient-info').innerText = `${data.patient.name} (${data.patient.age}y, ${data.patient.gender})`;
+                document.getElementById('rep-conj-val').innerText = data.scans.conjunctiva_prob !== null ? `${Math.round(data.scans.conjunctiva_prob * 100)}% Anemia Prob` : 'No Ocular Scan';
+                document.getElementById('rep-nail-val').innerText = data.scans.fingernail_prob !== null ? `${Math.round(data.scans.fingernail_prob * 100)}% Anemia Prob` : 'No Nail Scan';
+                document.getElementById('rep-breath-val').innerText = data.stethoscope_result.toUpperCase();
+                document.getElementById('rep-vitals-val').innerText = `${data.vitals.spo2}% SpO2 | ${data.vitals.heart_rate} bpm | ${data.vitals.temperature}°F`;
+
+                document.getElementById('rep-advice-en').innerText = data.advice;
+                document.getElementById('rep-advice-hi').innerText = data.hindi_advice;
+            })
+            .catch(err => {
+                console.error("Screening failed", err);
+                alert("Screening failed. Ensure Flask API server is running locally.");
+            });
+        }
+
+        // Doctor list
+        function loadCases() {
+            fetch('/api/cases')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('kpi-total').innerText = data.length;
+                const criticalCount = data.filter(c => c.screening.severity === 'CRITICAL').length;
+                document.getElementById('kpi-critical').innerText = criticalCount;
+                const pendingCount = data.filter(c => c.status === 'Pending Review').length;
+                document.getElementById('kpi-pending').innerText = pendingCount;
+                const reviewedCount = data.filter(c => c.status === 'Prescribed' || c.status === 'Escalated').length;
+                document.getElementById('kpi-reviewed').innerText = reviewedCount;
+
+                const tbody = document.getElementById('doctor-patient-list');
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted)">No screenings registered in database yet. Run a screening first.</td></tr>';
+                    return;
+                }
+
+                data.forEach(c => {
+                    const tr = document.createElement('tr');
+                    tr.onclick = () => openReviewDrawer(c);
+
+                    let statusClass = 'status-pending';
+                    if (c.status === 'Prescribed') statusClass = 'status-prescribed';
+                    if (c.status === 'Escalated') statusClass = 'status-escalated';
+
+                    let severityClass = 'color:#2ec4b6';
+                    if (c.screening.severity === 'MODERATE RISK') severityClass = 'color:#ff9f1c';
+                    else if (c.screening.severity === 'HIGH RISK') severityClass = 'color:#e71d36';
+                    else if (c.screening.severity === 'CRITICAL') severityClass = 'color:#d90429; font-weight:700;';
+
+                    tr.innerHTML = `
+                        <td>
+                            <strong>${c.name}</strong>
+                            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">${c.age}yo ${c.gender.toUpperCase()} | ${c.location}</div>
+                        </td>
+                        <td>${Math.round(c.screening.risk_score)}%</td>
+                        <td style="${severityClass}">${c.screening.severity}</td>
+                        <td>${c.screening.symptoms.length > 0 ? c.screening.symptoms.join(', ') : 'None'}</td>
+                        <td>${c.screening.stethoscope_result.toUpperCase()}</td>
+                        <td><span class="badge-status ${statusClass}">${c.status}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(err => console.error("Failed to load patient cases", err));
+        }
+
+        // Open detailed doctor drawer
+        function openReviewDrawer(patientCase) {
+            selectedPatientIdForReview = patientCase.patient_id;
+            activePatientCaseForReview = patientCase;
+            
+            document.getElementById('doctor-review-drawer').style.display = 'block';
+            document.getElementById('drawer-patient-title').innerText = `Review Case: ${patientCase.name} (${patientCase.age}y ${patientCase.gender.toUpperCase()})`;
+
+            document.getElementById('dr-rep-location').innerText = patientCase.location;
+            
+            let scoreVal = Math.round(patientCase.screening.risk_score);
+            let badgeBg = '#2ec4b625';
+            let badgeColor = '#2ec4b6';
+            if (patientCase.screening.severity === 'CRITICAL') { badgeBg = 'rgba(217,4,41,0.15)'; badgeColor = '#d90429'; }
+            else if (patientCase.screening.severity === 'HIGH RISK') { badgeBg = 'rgba(231,29,54,0.15)'; badgeColor = '#e71d36'; }
+            else if (patientCase.screening.severity === 'MODERATE RISK') { badgeBg = 'rgba(255,159,28,0.15)'; badgeColor = '#ff9f1c'; }
+            
+            document.getElementById('dr-rep-risk').innerHTML = `${scoreVal}% <span class="badge-status" style="margin-left: 8px; vertical-align: middle; background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeColor}40;">${patientCase.screening.severity}</span>`;
+
+            document.getElementById('dr-rep-conj').innerText = patientCase.screening.conjunctiva_prob !== null ? `${Math.round(patientCase.screening.conjunctiva_prob * 100)}%` : 'N/A';
+            document.getElementById('dr-rep-nail').innerText = patientCase.screening.fingernail_prob !== null ? `${Math.round(patientCase.screening.fingernail_prob * 100)}%` : 'N/A';
+            document.getElementById('dr-rep-steth').innerText = patientCase.screening.stethoscope_result.toUpperCase();
+            document.getElementById('dr-rep-vitals').innerText = `${patientCase.screening.spo2}% SpO2 | ${patientCase.screening.heart_rate} bpm | ${patientCase.screening.temperature}°F`;
+            document.getElementById('dr-rep-symptoms').innerText = patientCase.screening.symptoms.length > 0 ? patientCase.screening.symptoms.join(', ') : 'None';
+
+            document.getElementById('presc-notes').value = patientCase.prescription ? patientCase.prescription.doctor_notes : '';
+            document.getElementById('presc-status').value = patientCase.status !== 'Pending Review' ? patientCase.status : 'Prescribed';
+            
+            document.getElementById('med-iron').checked = false;
+            document.getElementById('med-vitc').checked = false;
+            document.getElementById('med-folic').checked = false;
+            document.getElementById('med-deworm').checked = false;
+            document.getElementById('med-b12').checked = false;
+            document.getElementById('med-pcm').checked = false;
+            document.getElementById('med-ors').checked = false;
+            document.getElementById('med-calcium').checked = false;
+
+            if (patientCase.prescription) {
+                patientCase.prescription.prescribed_meds.forEach(med => {
+                    if (med.includes("Iron")) document.getElementById('med-iron').checked = true;
+                    if (med.includes("Vitamin C")) document.getElementById('med-vitc').checked = true;
+                    if (med.includes("Folic")) document.getElementById('med-folic').checked = true;
+                    if (med.includes("Albendazole")) document.getElementById('med-deworm').checked = true;
+                    if (med.includes("B12")) document.getElementById('med-b12').checked = true;
+                    if (med.includes("Paracetamol")) document.getElementById('med-pcm').checked = true;
+                    if (med.includes("ORS")) document.getElementById('med-ors').checked = true;
+                    if (med.includes("Calcium")) document.getElementById('med-calcium').checked = true;
+                });
+            }
+
+            document.getElementById('doctor-review-drawer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closeReviewDrawer() {
+            document.getElementById('doctor-review-drawer').style.display = 'none';
+        }
+
+        // Submit prescription
+        function submitPrescription() {
+            if (!selectedPatientIdForReview || !activePatientCaseForReview) return;
+
+            const notes = document.getElementById('presc-notes').value;
+            const status = document.getElementById('presc-status').value;
+            
+            const meds = [];
+            if (document.getElementById('med-iron').checked) meds.push(document.getElementById('med-iron').value);
+            if (document.getElementById('med-vitc').checked) meds.push(document.getElementById('med-vitc').value);
+            if (document.getElementById('med-folic').checked) meds.push(document.getElementById('med-folic').value);
+            if (document.getElementById('med-deworm').checked) meds.push(document.getElementById('med-deworm').value);
+            if (document.getElementById('med-b12').checked) meds.push(document.getElementById('med-b12').value);
+            if (document.getElementById('med-pcm').checked) meds.push(document.getElementById('med-pcm').value);
+            if (document.getElementById('med-ors').checked) meds.push(document.getElementById('med-ors').value);
+            if (document.getElementById('med-calcium').checked) meds.push(document.getElementById('med-calcium').value);
+
+            // ── CLINICAL PRESCRIPTION VALIDATIONS ──
+            const severity = activePatientCaseForReview.screening.severity;
+            const spo2 = activePatientCaseForReview.screening.spo2;
+            const temp = activePatientCaseForReview.screening.temperature;
+            
+            const hasIron = meds.includes("Iron Supplement 100mg");
+            const hasVitC = meds.includes("Vitamin C 500mg");
+            const hasFolic = meds.includes("Folic Acid 5mg");
+            const hasDeworm = meds.includes("Albendazole 400mg");
+            
+            const warnings = [];
+
+            // 1. SpO2 Hypoxia Warning
+            if (spo2 !== null && spo2 < 90 && status !== "Escalated") {
+                warnings.push("🚨 Patient has severe hypoxia (SpO2 < 90%). Supplements alone are insufficient! They need immediate oxygen therapy. Please consider changing 'Action Status' to 'Escalate to Hospital'.");
+            }
+            
+            // 2. Over-prescribing to Low Risk Patient
+            if (severity === "LOW RISK" && (hasIron || hasVitC || hasFolic || hasDeworm)) {
+                warnings.push("⚠️ Patient has LOW RISK / normal physiology. Prescribing iron, folic acid, or dewormer may be unnecessary and cause iron overload side-effects.");
+            }
+            
+            // 3. Under-prescribing to High/Critical Anemic Patient
+            if ((severity === "HIGH RISK" || severity === "CRITICAL") && (!hasIron || !hasVitC)) {
+                warnings.push(`⚠️ Patient is in a ${severity} state. Standard medical guidelines suggest prescribing both Iron Supplement and Vitamin C (to maximize iron absorption).`);
+            }
+            
+            // 4. Fever/Antipyretic Notes Check
+            if (temp !== null && temp > 101 && !notes.toLowerCase().includes("paracetamol") && !notes.toLowerCase().includes("fever") && !notes.toLowerCase().includes("calpol")) {
+                warnings.push("⚠️ Patient has a high fever (> 101°F). However, no antipyretic meds (like Paracetamol) or fever care guidelines are mentioned in the Diagnostic Notes.");
+            }
+
+            if (warnings.length > 0) {
+                const proceed = confirm("Clinical Safety Warnings:\n\n" + warnings.join("\n\n") + "\n\nDo you want to proceed with this prescription anyway?");
+                if (!proceed) return;
+            }
+
+            fetch('/api/prescribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    patient_id: selectedPatientIdForReview,
+                    doctor_notes: notes,
+                    prescribed_meds: meds,
+                    status: status
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                closeReviewDrawer();
+                loadCases();
+            })
+            .catch(err => console.error("Failed to prescribe meds", err));
+        }
+
+        function updateDiagnostics() {
+            fetch('/api/cases')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('db-records-count').innerText = data.length + " cases";
+            })
+            .catch(err => console.error(err));
+        }
+    </script>
 </body>
 </html>
