@@ -1662,7 +1662,7 @@
             })
             .catch(err => {
                 console.error("Screening failed", err);
-                alert("Screening failed. Ensure Flask API server is running locally.");
+                alert(`Screening failed. Ensure the Flask API server is running at: ${getApiUrl('/api/screen')}\n\nYou can click the Gear (⚙️) icon in the top header to configure a custom API Server address (e.g. your deployed Render service URL).`);
             });
         }
 
@@ -1858,7 +1858,17 @@
 
         // ── API SETTINGS CONFIGURATION ENGINE ──
         function getApiUrl(endpoint) {
-            const baseUrl = localStorage.getItem('swasthai_api_url') || '';
+            let baseUrl = localStorage.getItem('swasthai_api_url');
+            if (baseUrl === null) {
+                const host = window.location.hostname;
+                const protocol = window.location.protocol;
+                // If hosted on GitHub Pages or run locally as static file (file://), default to localhost API
+                if (protocol === 'file:' || (host !== '127.0.0.1' && host !== 'localhost' && host !== '')) {
+                    baseUrl = 'http://127.0.0.1:5000';
+                } else {
+                    baseUrl = '';
+                }
+            }
             if (baseUrl) {
                 const cleanedBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
                 const cleanedEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
@@ -1869,7 +1879,17 @@
 
         function openSettings() {
             document.getElementById('settings-modal').style.display = 'flex';
-            document.getElementById('api-base-url').value = localStorage.getItem('swasthai_api_url') || '';
+            let currentUrl = localStorage.getItem('swasthai_api_url');
+            if (currentUrl === null) {
+                const host = window.location.hostname;
+                const protocol = window.location.protocol;
+                if (protocol === 'file:' || (host !== '127.0.0.1' && host !== 'localhost' && host !== '')) {
+                    currentUrl = 'http://127.0.0.1:5000';
+                } else {
+                    currentUrl = '';
+                }
+            }
+            document.getElementById('api-base-url').value = currentUrl;
             document.getElementById('api-status-text').innerText = "Status: Unchecked";
             document.getElementById('api-status-text').style.color = 'var(--text-muted)';
         }
@@ -1897,8 +1917,16 @@
             statusText.style.color = 'var(--warning)';
 
             let testUrl = '/health';
-            if (url) {
-                const cleanedBase = url.endsWith('/') ? url.slice(0, -1) : url;
+            const finalUrl = url || (function() {
+                const host = window.location.hostname;
+                const protocol = window.location.protocol;
+                if (protocol === 'file:' || (host !== '127.0.0.1' && host !== 'localhost' && host !== '')) {
+                    return 'http://127.0.0.1:5000';
+                }
+                return '';
+            })();
+            if (finalUrl) {
+                const cleanedBase = finalUrl.endsWith('/') ? finalUrl.slice(0, -1) : finalUrl;
                 testUrl = cleanedBase + '/health';
             }
 
