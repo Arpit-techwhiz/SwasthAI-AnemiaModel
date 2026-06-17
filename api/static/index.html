@@ -1875,8 +1875,8 @@
             if (baseUrl === null) {
                 const host = window.location.hostname;
                 const protocol = window.location.protocol;
-                // If hosted on GitHub Pages or run locally as static file (file://), default to localhost API
-                if (protocol === 'file:' || (host !== '127.0.0.1' && host !== 'localhost' && host !== '')) {
+                // Default to localhost ONLY if loaded via file:// or from a known static host (like github.io or github.dev)
+                if (protocol === 'file:' || host.includes('github.io') || host.includes('github.dev')) {
                     baseUrl = 'http://127.0.0.1:5000';
                 } else {
                     baseUrl = '';
@@ -1896,7 +1896,7 @@
             if (currentUrl === null) {
                 const host = window.location.hostname;
                 const protocol = window.location.protocol;
-                if (protocol === 'file:' || (host !== '127.0.0.1' && host !== 'localhost' && host !== '')) {
+                if (protocol === 'file:' || host.includes('github.io') || host.includes('github.dev')) {
                     currentUrl = 'http://127.0.0.1:5000';
                 } else {
                     currentUrl = '';
@@ -1933,7 +1933,7 @@
             const finalUrl = url || (function() {
                 const host = window.location.hostname;
                 const protocol = window.location.protocol;
-                if (protocol === 'file:' || (host !== '127.0.0.1' && host !== 'localhost' && host !== '')) {
+                if (protocol === 'file:' || host.includes('github.io') || host.includes('github.dev')) {
                     return 'http://127.0.0.1:5000';
                 }
                 return '';
