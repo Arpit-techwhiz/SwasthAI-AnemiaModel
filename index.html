@@ -746,6 +746,7 @@
             }
         }
 
+        /* Mobile-friendly horizontal navigation bar */
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
@@ -756,10 +757,11 @@
                 width: 100%;
                 border-right: none;
                 border-bottom: 1px solid var(--border-color);
-                padding: 15px 20px;
+                padding: 10px 15px;
                 flex-direction: row;
+                justify-content: space-between;
                 align-items: center;
-                gap: 15px;
+                gap: 12px;
                 position: sticky;
                 top: 0;
                 z-index: 1000;
@@ -770,27 +772,39 @@
                 margin-bottom: 0;
                 text-align: left;
                 flex-direction: row;
-                gap: 10px;
+                gap: 8px;
                 align-items: center;
             }
 
+            .logo-subtitle {
+                display: none; /* Hide subtitle on mobile to save vertical space */
+            }
+
             .brand-logo {
-                width: 40px;
-                height: 40px;
+                width: 32px;
+                height: 32px;
                 margin-bottom: 0;
             }
 
             .nav-links {
                 flex-direction: row;
-                gap: 8px;
-                flex-wrap: wrap;
-                justify-content: flex-end;
+                gap: 6px;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                -webkit-overflow-scrolling: touch;
+                justify-content: flex-start;
+                scrollbar-width: none;
+            }
+            
+            .nav-links::-webkit-scrollbar {
+                display: none;
             }
 
             .nav-item {
-                padding: 8px 12px;
-                font-size: 0.85rem;
-                gap: 6px;
+                padding: 6px 12px;
+                font-size: 0.8rem;
+                gap: 5px;
+                flex-shrink: 0;
             }
 
             .sidebar-footer {
@@ -798,14 +812,14 @@
             }
 
             .main-content {
-                padding: 20px;
+                padding: 15px;
                 height: auto;
                 overflow-y: visible;
             }
 
             .form-row {
                 grid-template-columns: 1fr;
-                gap: 15px;
+                gap: 12px;
             }
 
             .form-group.full-width {
@@ -814,11 +828,12 @@
 
             .vitals-grid {
                 grid-template-columns: 1fr;
+                gap: 12px;
             }
 
             .doctor-kpi-row {
                 grid-template-columns: repeat(2, 1fr);
-                gap: 12px;
+                gap: 10px;
             }
 
             .patient-table-card {
@@ -833,17 +848,28 @@
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
+            
+            .scan-grid {
+                grid-template-columns: 1fr !important;
+                gap: 15px;
+            }
+            
+            .audio-clips-row {
+                grid-template-columns: 1fr !important;
+                gap: 8px;
+            }
         }
 
         @media (max-width: 480px) {
             .sidebar {
                 flex-direction: column;
                 align-items: stretch;
+                padding: 10px 15px;
+                gap: 8px;
             }
 
             .nav-links {
-                justify-content: center;
-                 Moz-justify-content: center;
+                justify-content: flex-start;
                 width: 100%;
             }
 
@@ -860,8 +886,13 @@
         <div>
             <div class="logo-area">
                 <img src="/static/logo.jpg" alt="SwasthAI Logo" class="brand-logo">
-                <h1>SwasthAI</h1>
-                <div class="logo-subtitle">Rural Health AI</div>
+                <div style="display: flex; flex-direction: column; flex-grow: 1;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                        <h1 style="margin:0; font-size: 1.3rem;">SwasthAI</h1>
+                        <span onclick="openSettings()" style="cursor: pointer; font-size: 1.15rem; opacity: 0.7; transition: opacity 0.3s; padding: 2px;" title="Configure API Server Connection">⚙️</span>
+                    </div>
+                    <div class="logo-subtitle">Rural Health AI</div>
+                </div>
             </div>
             <div class="nav-links">
                 <div class="nav-item active" onclick="switchTab('screening', this)">
@@ -1452,7 +1483,7 @@
             const text = document.getElementById('voice-transcript').value;
             if (!text.trim()) return;
 
-            fetch('/api/voice-symptoms', {
+            fetch(getApiUrl('/api/voice-symptoms'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text: text })
@@ -1552,7 +1583,7 @@
                 const formData = new FormData();
                 formData.append('audio', file);
                 
-                fetch('/api/predict/stethoscope', {
+                fetch(getApiUrl('/api/predict/stethoscope'), {
                     method: 'POST',
                     body: formData
                 })
@@ -1593,7 +1624,7 @@
             if (conjunctivaProbVal !== null) payload.conjunctiva_prob = conjunctivaProbVal;
             if (fingernailProbVal !== null) payload.fingernail_prob = fingernailProbVal;
 
-            fetch('/api/screen', {
+            fetch(getApiUrl('/api/screen'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -1637,7 +1668,7 @@
 
         // Doctor list
         function loadCases() {
-            fetch('/api/cases')
+            fetch(getApiUrl('/api/cases'))
             .then(res => res.json())
             .then(data => {
                 document.getElementById('kpi-total').innerText = data.length;
@@ -1797,7 +1828,7 @@
                 if (!proceed) return;
             }
 
-            fetch('/api/prescribe', {
+            fetch(getApiUrl('/api/prescribe'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -1817,13 +1848,102 @@
         }
 
         function updateDiagnostics() {
-            fetch('/api/cases')
+            fetch(getApiUrl('/api/cases'))
             .then(res => res.json())
             .then(data => {
                 document.getElementById('db-records-count').innerText = data.length + " cases";
             })
             .catch(err => console.error(err));
         }
+
+        // ── API SETTINGS CONFIGURATION ENGINE ──
+        function getApiUrl(endpoint) {
+            const baseUrl = localStorage.getItem('swasthai_api_url') || '';
+            if (baseUrl) {
+                const cleanedBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+                const cleanedEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+                return cleanedBase + cleanedEndpoint;
+            }
+            return endpoint;
+        }
+
+        function openSettings() {
+            document.getElementById('settings-modal').style.display = 'flex';
+            document.getElementById('api-base-url').value = localStorage.getItem('swasthai_api_url') || '';
+            document.getElementById('api-status-text').innerText = "Status: Unchecked";
+            document.getElementById('api-status-text').style.color = 'var(--text-muted)';
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-modal').style.display = 'none';
+        }
+
+        function saveSettings() {
+            const url = document.getElementById('api-base-url').value.trim();
+            if (url) {
+                localStorage.setItem('swasthai_api_url', url);
+            } else {
+                localStorage.removeItem('swasthai_api_url');
+            }
+            closeSettings();
+            alert("Settings saved. Reloading page...");
+            window.location.reload();
+        }
+
+        function testApiConnection() {
+            const url = document.getElementById('api-base-url').value.trim();
+            const statusText = document.getElementById('api-status-text');
+            statusText.innerText = "Checking...";
+            statusText.style.color = 'var(--warning)';
+
+            let testUrl = '/health';
+            if (url) {
+                const cleanedBase = url.endsWith('/') ? url.slice(0, -1) : url;
+                testUrl = cleanedBase + '/health';
+            }
+
+            fetch(testUrl)
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.status === 'ok') {
+                    statusText.innerText = "Status: Online (Model Loaded: " + data.model_loaded + ")";
+                    statusText.style.color = 'var(--success)';
+                } else {
+                    statusText.innerText = "Status: Error (Invalid response)";
+                    statusText.style.color = 'var(--danger)';
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                statusText.innerText = "Status: Offline (Connection failed)";
+                statusText.style.color = 'var(--danger)';
+            });
+        }
     </script>
+
+    <!-- API SETTINGS MODAL -->
+    <div id="settings-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+        <div class="card" style="width: 90%; max-width: 440px; padding: 25px; border: 1px solid var(--border-color); box-shadow: 0 20px 50px rgba(0,0,0,0.6); background: #0f172a;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+                <h3 style="margin:0; font-size: 1.15rem; color: var(--warning); display:flex; align-items:center; gap:8px;"><span>⚙️</span> API Connection Settings</h3>
+                <span onclick="closeSettings()" style="cursor:pointer; font-size: 1.5rem; opacity:0.7; color:white;">&times;</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); line-height:1.45; margin-bottom: 15px; text-transform: none;">
+                Configure the API server address. If you are hosting the dashboard on GitHub Pages, point it to your deployed Render service (e.g. <code>https://swasthai-anemia-api.onrender.com</code>).
+            </p>
+            <div class="form-group" style="margin-bottom:15px;">
+                <label style="font-size:0.75rem; text-transform:uppercase; letter-spacing:1px;">API Server Base URL</label>
+                <input type="text" id="api-base-url" placeholder="e.g. https://swasthai-anemia-api.onrender.com" style="width:100%; margin-top:6px; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); color: white; padding: 10px; border-radius: 8px;">
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+                <span id="api-status-text" style="font-size:0.78rem; font-weight:600; color:var(--text-muted);">Status: Unchecked</span>
+                <button class="btn btn-secondary" style="padding:6px 12px; font-size:0.72rem; border-radius:6px;" onclick="testApiConnection()">Test Connection</button>
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button class="btn btn-secondary" style="border-radius:8px; padding: 8px 16px; font-size: 0.82rem;" onclick="closeSettings()">Cancel</button>
+                <button class="btn" style="border-radius:8px; padding: 8px 16px; font-size: 0.82rem;" onclick="saveSettings()">Save & Connect</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
