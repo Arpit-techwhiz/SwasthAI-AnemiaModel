@@ -1505,7 +1505,7 @@
 
         // Symptom toggle
         function toggleSymptom(symptom) {
-            const tag = document.getElementById('tag-' + symptom.replace(' ', '-'));
+            const tag = document.getElementById('tag-' + symptom.replace(/ /g, '-'));
             if (activeSymptoms.has(symptom)) {
                 activeSymptoms.delete(symptom);
                 tag.classList.remove('active');
@@ -1582,7 +1582,7 @@
                 // Set new tags
                 data.symptoms.forEach(s => {
                     activeSymptoms.add(s);
-                    const tag = document.getElementById('tag-' + s.replace(' ', '-'));
+                    const tag = document.getElementById('tag-' + s.replace(/ /g, '-'));
                     if (tag) tag.classList.add('active');
                 });
             })
