@@ -362,6 +362,6 @@ python test_comprehensive.py
 
 ## 📄 License & Contact
 *   **Version:** 1.0.0
-*   **Author:** SwasthAI Core Team
-*   **Clinical Lead:** clinical-support@swasthai.org
-*   **System Status:** Production Ready (Green)
+*   **Author:** Arpit Chaudhary (Founder & Lead Developer, SwasthAI)
+*   **Project Status:** Prototype
+*   **Contact:** arpit21basti@gmail.com
