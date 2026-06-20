@@ -739,29 +739,92 @@
             box-shadow: 0 0 8px var(--warning);
         }
 
-        /* Responsive Utilities */
+        /* Responsive Utilities & Helpers */
+        .desktop-only-block { display: block !important; }
+        .mobile-only-block { display: none !important; }
+        .desktop-only { display: inline !important; }
+        .mobile-only { display: none !important; }
+
+        /* Patient Card Styling (Mobile) */
+        .patient-mobile-card {
+            background: #1e293b;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .patient-mobile-card.border-low { border-left: 4px solid var(--success); }
+        .patient-mobile-card.border-moderate { border-left: 4px solid var(--warning); }
+        .patient-mobile-card.border-high { border-left: 4px solid var(--danger); }
+        .patient-mobile-card.border-critical { border-left: 4px solid var(--danger); }
+
+        .card-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 8px;
+        }
+
+        .card-detail-row {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.85rem;
+        }
+
+        .card-detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-detail-label {
+            color: var(--text-muted);
+        }
+
+        .card-detail-val {
+            font-weight: 500;
+        }
+
         @media (max-width: 1024px) {
             .dashboard-grid, .drawer-grid {
                 grid-template-columns: 1fr;
             }
+
+            .diagnostics-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
         }
 
-        /* Mobile-friendly horizontal navigation bar */
+        /* Mobile-friendly horizontal navigation bar & UI elements */
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
                 overflow: auto;
             }
 
+            .desktop-only-block { display: none !important; }
+            .mobile-only-block { display: block !important; }
+            .desktop-only { display: none !important; }
+            .mobile-only { display: inline !important; }
+
             .sidebar {
                 width: 100%;
                 border-right: none;
                 border-bottom: 1px solid var(--border-color);
-                padding: 10px 15px;
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-                gap: 12px;
+                padding: 12px 15px;
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
                 position: sticky;
                 top: 0;
                 z-index: 1000;
@@ -774,6 +837,7 @@
                 flex-direction: row;
                 gap: 8px;
                 align-items: center;
+                width: 100%;
             }
 
             .logo-subtitle {
@@ -788,12 +852,13 @@
 
             .nav-links {
                 flex-direction: row;
-                gap: 6px;
+                gap: 8px;
                 overflow-x: auto;
                 flex-wrap: nowrap;
                 -webkit-overflow-scrolling: touch;
                 justify-content: flex-start;
                 scrollbar-width: none;
+                width: 100%;
             }
             
             .nav-links::-webkit-scrollbar {
@@ -801,10 +866,11 @@
             }
 
             .nav-item {
-                padding: 6px 12px;
+                padding: 8px 14px;
                 font-size: 0.8rem;
-                gap: 5px;
+                gap: 6px;
                 flex-shrink: 0;
+                border-radius: 8px;
             }
 
             .sidebar-footer {
@@ -862,9 +928,7 @@
 
         @media (max-width: 480px) {
             .sidebar {
-                flex-direction: column;
-                align-items: stretch;
-                padding: 10px 15px;
+                padding: 10px 12px;
                 gap: 8px;
             }
 
@@ -873,8 +937,18 @@
                 width: 100%;
             }
 
-            .doctor-kpi-row {
-                grid-template-columns: 1fr;
+            .voice-controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .kpi-card {
+                padding: 12px !important;
+            }
+
+            .kpi-value {
+                font-size: 1.5rem !important;
             }
         }
     </style>
@@ -897,15 +971,18 @@
             <div class="nav-links">
                 <div class="nav-item active" onclick="switchTab('screening', this)">
                     <span>📲</span>
-                    <span>AI Screening Portal</span>
+                    <span class="desktop-only">AI Screening Portal</span>
+                    <span class="mobile-only">Screening</span>
                 </div>
                 <div class="nav-item" onclick="switchTab('doctor', this)">
                     <span>🩺</span>
-                    <span>Doctor Dashboard</span>
+                    <span class="desktop-only">Doctor Dashboard</span>
+                    <span class="mobile-only">Doctor Portal</span>
                 </div>
                 <div class="nav-item" onclick="switchTab('diagnostics', this)">
                     <span>⚙️</span>
-                    <span>Diagnostics & Edge</span>
+                    <span class="desktop-only">Diagnostics & Edge</span>
+                    <span class="mobile-only">Diagnostics</span>
                 </div>
             </div>
         </div>
@@ -1176,7 +1253,8 @@
             </div>
 
             <!-- Patient Table -->
-            <div class="patient-table-card">
+            <!-- Patient Table (Desktop View) -->
+            <div class="patient-table-card desktop-only-block">
                 <table class="patient-table">
                     <thead>
                         <tr>
@@ -1192,6 +1270,11 @@
                         <!-- Populated by JavaScript -->
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Patient Cards (Mobile View) -->
+            <div class="patient-card-list mobile-only-block" id="doctor-patient-card-list" style="margin-top: 15px;">
+                <!-- Populated by JavaScript -->
             </div>
 
             <!-- Doctor Detail Review / Prescription Drawer -->
@@ -1690,26 +1773,39 @@
 
                 // Populate patient cases table
                 const tbody = document.getElementById('doctor-patient-list');
+                const cardList = document.getElementById('doctor-patient-card-list');
                 tbody.innerHTML = '';
+                if (cardList) cardList.innerHTML = '';
 
                 if (data.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted)">No screenings registered in database yet. Run a screening first.</td></tr>';
+                    if (cardList) {
+                        cardList.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px;">No screenings registered in database yet. Run a screening first.</div>';
+                    }
                     return;
                 }
 
                 data.forEach(c => {
-                    const tr = document.createElement('tr');
-                    tr.onclick = () => openReviewDrawer(c);
-
                     let statusClass = 'status-pending';
                     if (c.status === 'Prescribed') statusClass = 'status-prescribed';
                     if (c.status === 'Escalated') statusClass = 'status-escalated';
 
                     let severityClass = 'color:#2ec4b6';
-                    if (c.screening.severity === 'MODERATE RISK') severityClass = 'color:#ff9f1c';
-                    else if (c.screening.severity === 'HIGH RISK') severityClass = 'color:#e71d36';
-                    else if (c.screening.severity === 'CRITICAL') severityClass = 'color:#d90429; font-weight:700;';
+                    let borderClass = 'border-low';
+                    if (c.screening.severity === 'MODERATE RISK') {
+                        severityClass = 'color:#ff9f1c';
+                        borderClass = 'border-moderate';
+                    } else if (c.screening.severity === 'HIGH RISK') {
+                        severityClass = 'color:#e71d36';
+                        borderClass = 'border-high';
+                    } else if (c.screening.severity === 'CRITICAL') {
+                        severityClass = 'color:#d90429; font-weight:700;';
+                        borderClass = 'border-critical';
+                    }
 
+                    // Desktop Table Row
+                    const tr = document.createElement('tr');
+                    tr.onclick = () => openReviewDrawer(c);
                     tr.innerHTML = `
                         <td>
                             <strong>${c.name}</strong>
@@ -1722,6 +1818,40 @@
                         <td><span class="badge-status ${statusClass}">${c.status}</span></td>
                     `;
                     tbody.appendChild(tr);
+
+                    // Mobile Card
+                    if (cardList) {
+                        const card = document.createElement('div');
+                        card.className = `patient-mobile-card ${borderClass}`;
+                        card.onclick = () => openReviewDrawer(c);
+                        card.innerHTML = `
+                            <div class="card-header-row">
+                                <div style="display:flex; flex-direction:column; gap:2px;">
+                                    <strong style="font-size:1rem; color:white;">${c.name}</strong>
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">${c.age}yo ${c.gender.toUpperCase()} | ${c.location}</span>
+                                </div>
+                                <span class="badge-status ${statusClass}">${c.status}</span>
+                            </div>
+                            <div class="card-detail-row">
+                                <div class="card-detail-item">
+                                    <span class="card-detail-label">Fused Risk Score</span>
+                                    <span class="card-detail-val" style="${severityClass}">${Math.round(c.screening.risk_score)}% (${c.screening.severity})</span>
+                                </div>
+                                <div class="card-detail-item">
+                                    <span class="card-detail-label">Key Symptoms</span>
+                                    <span class="card-detail-val" style="color:white; text-align:right; max-width:60%; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">${c.screening.symptoms.length > 0 ? c.screening.symptoms.join(', ') : 'None'}</span>
+                                </div>
+                                <div class="card-detail-item">
+                                    <span class="card-detail-label">Lung Sound</span>
+                                    <span class="card-detail-val" style="color:white;">${c.screening.stethoscope_result.toUpperCase()}</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-secondary" style="width:100%; font-size:0.8rem; padding:8px; border-radius:8px; margin-top:5px; display:flex; align-items:center; justify-content:center; gap:6px;">
+                                🩺 Review Case & Prescribe
+                            </button>
+                        `;
+                        cardList.appendChild(card);
+                    }
                 });
             })
             .catch(err => console.error("Failed to load patient cases", err));
