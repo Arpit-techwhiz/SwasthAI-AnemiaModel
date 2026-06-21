@@ -11,47 +11,60 @@ if hasattr(sys.stderr, "reconfigure"):
 
 import re
 
-# Mapping of Hindi/Hinglish keywords to standardized English symptom tags
+# Mapping of Hindi/Hinglish and Regional Indian keywords to standardized English symptom tags
 SYMPTOM_KEYWORD_MAPS = {
     "dizziness": [
         "chakkar", "chakar", "sar ghumna", "sir ghumna", "sir dard aur chakkar", "giddiness", "dizzy",
-        "चक्कर", "सिर घूमना", "सर घूमना"
+        "चक्कर", "सिर घूमना", "सर घूमना", "चक्कर येणे", "doke ghumne", "thalaichutru", "thalaivali", "தலைச்சுற்றல்",
+        "thala thiruguta", "kallu thirugadam", "తల తిరగడం", "thale thiruguvudu", "ತಲೆ ತಿರುಗುವಿಕೆ", "matha ghora", "মাথা ঘোরা"
     ],
     "fatigue": [
         "thakan", "thakawat", "kamzori", "kamjori", "alas", "thak", "tired", "weakness", "fatigue",
-        "थकान", "थकावट", "कमजोरी", "कमज़ोरी", "आलस", "कमजोर"
+        "थकान", "थकावट", "कमजोरी", "कमज़ोरी", "आलस", "कमजोर", "thakva", "ashaktapana", "थकवा", "अशक्तपणा",
+        "soarvu", "பலவீனம்", "nirasam", "alasata", "నీరసం", "అలసట", "susthu", "alasike", "ಸುಸ್ತು", "ಆಲಸಿಕೆ",
+        "klanti", "durbolta", "ক্লান্তি", "দুর্বলতা"
     ],
     "breathless": [
         "saans", "saas", "haapna", "hafna", "breathless", "shortness of breath", "saans phoolna",
-        "सांस", "साँस", "हाफ", "हाफने", "सांस फूलना"
+        "सांस", "साँस", "हाफ", "हाफने", "सांस फूलना", "shwas", "dama lagne", "श्वास घ्यायला त्रास", "दम लागणे",
+        "moochu thinaral", "moochuvanguthal", "மூச்சுத்திணறல்", "shwasa adakadam", "dumu", "శ్వాస ఆడకపోవడం",
+        "ushiru kattuva", "ಉಸಿರಾಟದ தೊಂದರೆ", "hapa", "kosto", "হাঁপানির", "শ্বাসকষ্ট"
     ],
     "headache": [
         "sar dard", "sir dard", "sardard", "sirdard", "headache", "head ache",
-        "सर दर्द", "सिर दर्द", "सरदर्द", "सिरदर्द"
+        "सर दर्द", "सिर दर्द", "सरदर्द", "सिरदर्द", "doke dukhne", "डोकेदुखी", "thalai vali", "தலைவலி",
+        "thala noppi", "తల నొప్పి", "thale noovu", "ತಲೆನೋವು", "matha betha", "মাথা ব্যথা"
     ],
     "pale skin": [
         "peela", "peeli", "peelapan", "white skin", "safed", "pale", "pallor",
-        "पीला", "पीली", "पीलापन", "सफेद", "सफ़ेद"
+        "पीला", "पीली", "पीलापन", "सफेद", "सफ़εδ", "pandharepadne", "पांढरे पडणे", "veluththal", "வெளுத்த சருமம்",
+        "telipovatam", "పాలిపోవడం", "biḷupuvudu", "ಬಿಳುಚಿಕೊಳ್ಳುವುದು", "fika", "ফ্যাকাশে"
     ],
     "cold extremities": [
         "thande hath", "thanda per", "cold hands", "cold feet", "thande pair", "thanda hath", "thanda pair",
-        "ठंडे हाथ", "ठंडे पैर", "हाथ पैर ठंडे"
+        "ठंडे हाथ", "ठंडे पैर", "हाथ पैर ठंडे", "हात पाय थंड", "kai kal kulirchi", "கை கால் குளிர்ச்சி",
+        "kallu chethulu challaga", "కాళ్లు చేతులు చల్లబడటం", "kai kalu thandaguvudu", "ಕೈ காಲು ತಣ್ಣಗಾಗುವುದು",
+        "hath pa thanda", "হাত পা ঠান্ডা"
     ],
     "chest pain": [
         "seene me dard", "seene me jalan", "chest pain", "seena dard", "chestpain",
-        "छाती में दर्द", "सीने में दर्द", "सीना दर्द"
+        "छाती में दर्द", "सीने में दर्द", "सीना दर्द", "chati madhye dukhne", "छातीत दुखणे", "nenju vali", "நெஞ்சு வலி",
+        "chathi noppi", "ఛాతి నొప్పి", "ede noovu", "ಎದೆ నోవు", "buke betha", "বুকে ব্যথা"
     ],
     "brittle nails": [
         "nakhun tutna", "nakhun kharab", "brittle nails", "brittlenails", "nakhun kamzor",
-        "कमजोर नाखून", "नाखून टूटना", "नाखून टूटना"
+        "कमजोर नाखून", "नाखून टूटना", "नखे तुटणे", "nagam udayal", "நகங்கள் உடைவது",
+        "gollu viruguta", "గోళ్లు విరిగిపోవడం", "uguru odeyuvudu", "ಉಗುರು ಒಡೆಯುವುದು", "nokh bhenge", "নখ ভেঙে যাওয়া"
     ],
     "hair loss": [
         "baal jhadna", "hair fall", "hair loss", "hairfall", "hairloss",
-        "बाल झड़ना", "बालों का झड़ना", "बाल गिरना"
+        "बाल झड़ना", "बालों का झड़ना", "बाल गिरना", "kese ghalne", "केस गळणे", "mudi kottuthal", "முடி உதிர்தல்",
+        "ventrukalu udi", "జుట్టు రాలడం", "koodalu udiruvudu", "ಕೂದಲು ಉದುರುವಿಕೆ", "chul pora", "চুল পড়া"
     ],
     "loss of appetite": [
         "bhukh na lagna", "bhukh kam lagna", "loss of appetite", "loss of appetite", "bhukh kam",
-        "भूख न लगना", "भूख कम लगना", "कम भूख"
+        "भूख न लगना", "भूख कम लगना", "कम भूख", "bhuk na lagne", "भूख न लागणे", "basiyinmai", "பசியின்மை",
+        "akali lekapovadam", "ఆకలి లేకపోవడం", "hasivagadiruvudu", "ಹಸಿವಾಗದಿರುವುದು", "khude manda", "খিদে না পাওয়া"
     ]
 }
 

@@ -33,10 +33,17 @@ def init_db():
         age INTEGER,
         gender TEXT,
         location TEXT,
+        phone TEXT DEFAULT '',
         status TEXT DEFAULT 'Pending Review', -- Pending Review, Prescribed, Escalated
         created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
     """)
+    
+    # Ensure phone column exists for existing databases (migration)
+    try:
+        cursor.execute("ALTER TABLE patients ADD COLUMN phone TEXT DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass
     
     # Screenings Table
     cursor.execute("""
@@ -74,7 +81,7 @@ def init_db():
     print("💾 SQLite Database initialized successfully.")
 
 def save_screening(name, age, gender, location, conjunctiva_prob, fingernail_prob, 
-                   symptoms, stethoscope_result, heart_rate, spo2, temperature, risk_score, severity):
+                   symptoms, stethoscope_result, heart_rate, spo2, temperature, risk_score, severity, phone=""):
     """
     Save or update patient demographics, write screening results.
     Returns patient_id, screening_id.
@@ -88,12 +95,12 @@ def save_screening(name, age, gender, location, conjunctiva_prob, fingernail_pro
     
     if row:
         patient_id = row['id']
-        # Reset status to Pending Review on new screening
-        cursor.execute("UPDATE patients SET status = 'Pending Review', location = ? WHERE id = ?", (location, patient_id))
+        # Reset status to Pending Review on new screening, update location & phone
+        cursor.execute("UPDATE patients SET status = 'Pending Review', location = ?, phone = ? WHERE id = ?", (location, phone, patient_id))
     else:
         cursor.execute(
-            "INSERT INTO patients (name, age, gender, location, status) VALUES (?, ?, ?, ?, ?)",
-            (name, age, gender, location, "Pending Review")
+            "INSERT INTO patients (name, age, gender, location, phone, status) VALUES (?, ?, ?, ?, ?, ?)",
+            (name, age, gender, location, phone, "Pending Review")
         )
         patient_id = cursor.lastrowid
         
@@ -122,7 +129,7 @@ def get_all_cases():
     
     query = """
         SELECT 
-            p.id as patient_id, p.name, p.age, p.gender, p.location, p.status, p.created_at as patient_created,
+            p.id as patient_id, p.name, p.age, p.gender, p.location, p.phone, p.status, p.created_at as patient_created,
             s.id as screening_id, s.conjunctiva_prob, s.fingernail_prob, s.symptoms, 
             s.stethoscope_result, s.heart_rate, s.spo2, s.temperature, s.risk_score, s.severity,
             s.created_at as screening_created,
@@ -146,6 +153,7 @@ def get_all_cases():
             "age": r["age"],
             "gender": r["gender"],
             "location": r["location"],
+            "phone": r["phone"] if "phone" in r.keys() else "",
             "status": r["status"],
             "screening": {
                 "id": r["screening_id"],
@@ -192,6 +200,32 @@ def add_prescription(patient_id, doctor_notes, prescribed_meds, status="Prescrib
     conn.commit()
     conn.close()
     return True
+
+def get_patient_history(patient_id):
+    """Retrieve historical screenings for a specific patient ordered by timestamp."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    query = """
+        SELECT risk_score, spo2, heart_rate, temperature, created_at
+        FROM screenings
+        WHERE patient_id = ?
+        ORDER BY created_at ASC
+    """
+    cursor.execute(query, (patient_id,))
+    rows = cursor.fetchall()
+    
+    history = []
+    for r in rows:
+        history.append({
+            "risk_score": r["risk_score"],
+            "spo2": r["spo2"],
+            "heart_rate": r["heart_rate"],
+            "temperature": r["temperature"],
+            "timestamp": r["created_at"]
+        })
+    conn.close()
+    return history
 
 if __name__ == "__main__":
     init_db()

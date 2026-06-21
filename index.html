@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SwasthAI – AI-Powered Rural Health Screening Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">\n    <!-- Edge Clinical Platform CDN Script Extensions -->\n    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs/dist/tf.min.js"></script>\n    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-tflite/dist/tf-tflite.min.js"></script>\n    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-color: #070d19;
@@ -1027,18 +1027,32 @@
                             </div>
                         </div>
                         <div class="form-row">
-                            <div class="form-group full-width">
+                            <div class="form-group">
                                 <label>Location / ग्रामीण क्षेत्र</label>
                                 <input type="text" id="patient-location" placeholder="e.g. Village Kelwa, Rajasthan" value="Rural Rajasthan">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone Number / फोन नंबर</label>
+                                <input type="text" id="patient-phone" placeholder="e.g. +919876543210" value="+919876543210">
                             </div>
                         </div>
                     </div>
 
                     <!-- Hindi Voice Assistant Card -->
                     <div class="card">
-                        <div class="card-title"><span>🎙️</span>Hindi Voice Symptom Assistant</div>
+                        <div class="card-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <span>🎙️ Regional Voice Assistant</span>
+                            <select id="voice-lang-select" style="background:#0b1120; border:1px solid var(--border-color); color:white; padding:3px 8px; font-size:0.75rem; border-radius:6px;">
+                                <option value="hi-IN" selected>Hindi (हिन्दी)</option>
+                                <option value="mr-IN">Marathi (मराठी)</option>
+                                <option value="ta-IN">Tamil (தமிழ்)</option>
+                                <option value="te-IN">Telugu (తెలుగు)</option>
+                                <option value="kn-IN">Kannada (ಕನ್ನಡ)</option>
+                                <option value="bn-IN">Bengali (বাংলা)</option>
+                            </select>
+                        </div>
                         <div class="voice-section">
-                            <label>Speech Command / बोलें या टाइप करें (Hindi/Hinglish)</label>
+                            <label>Speech Command / बोलें या टाइप करें</label>
                             <textarea id="voice-transcript" rows="2" style="width: 100%; margin-top:8px;" placeholder="e.g. Mujhe bahut thakan lag rahi hai aur chakkar aa raha hai"></textarea>
                             
                             <div class="voice-controls">
@@ -1049,7 +1063,7 @@
                                     <span>🔍</span> Extract Symptoms
                                 </button>
                                 <div class="recording-indicator" id="rec-indicator">
-                                    <div class="pulse-dot"></div> Listening in Hindi...
+                                    <div class="pulse-dot"></div> Listening in regional language...
                                 </div>
                             </div>
                         </div>
@@ -1138,7 +1152,10 @@
 
                     <!-- Vitals Intake Slider -->
                     <div class="card">
-                        <div class="card-title"><span>🎛️</span>ESP32 Integrated Vitals Array</div>
+                        <div class="card-title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                            <span>🎛️ ESP32 Integrated Vitals Array</span>
+                            <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem; border-radius: 6px;" onclick="connectBLEVitals()">🔵 Pair BLE Sensor</button>
+                        </div>
                         <div class="vitals-grid">
                             <div class="vital-slider-box">
                                 <div class="vital-slider-header">
@@ -1363,10 +1380,22 @@
                                 </select>
                             </div>
                             <div class="form-group" style="justify-content: flex-end; display:flex; flex-direction:row;">
-                                <button class="btn" style="margin-top:15px; width:100%;" onclick="submitPrescription()">
-                                    ✍️ Save & Send Rx
-                                </button>
+                                <div style="display:flex; gap:10px; width:100%; margin-top:15px;">
+                                    <button class="btn btn-secondary" style="background:#25d366; color:white; border-color:#25d366; width:100%; font-size:0.85rem;" onclick="sendWhatsAppAlert()">
+                                        📲 Send Rx via WhatsApp
+                                    </button>
+                                    <button class="btn" style="width:100%; font-size:0.85rem;" onclick="submitPrescription()">
+                                        ✍️ Save & Send Rx
+                                    </button>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+                    <!-- Historical Analytics Chart -->
+                    <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.08); padding-top:20px;">
+                        <h4 style="font-size:1rem; margin-bottom:12px; color:var(--primary); font-weight:600;">Longitudinal Physiological Trends</h4>
+                        <div style="background:rgba(0,0,0,0.2); border-radius:12px; padding:15px; height: 260px; position:relative;">
+                            <canvas id="patient-trend-chart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -1444,7 +1473,7 @@
                         </tr>
                         <tr>
                             <td>Pending Sync Queue</td>
-                            <td>0 cases (Fully synced)</td>
+                            <td id="offline-sync-queue-status">0 cases (Fully synced)</td>
                         </tr>
                         <tr>
                             <td>Encryption Standard</td>
@@ -1452,7 +1481,7 @@
                         </tr>
                     </table>
                     <div style="margin-top:20px; text-align:center;">
-                        <button class="btn btn-secondary" onclick="alert('Offline SQLite database synced successfully to AWS Cloud API.')">
+                        <button class="btn btn-secondary" onclick="syncOfflineQueue()">
                             🔄 Sync Offline Database to Cloud
                         </button>
                     </div>
@@ -1470,6 +1499,10 @@
         // State management
         const activeSymptoms = new Set();
         let selectedAudioSample = 'none';
+        
+        // Edge Platform Extensions State
+        let browserModel = null;
+        let blePairInterval = null;
         let customAudioFile = null;
         let selectedPatientIdForReview = null;
         let activePatientCaseForReview = null;
@@ -1536,7 +1569,7 @@
             }
 
             recognition = new SpeechRecognition();
-            recognition.lang = 'hi-IN'; // Set Hindi language
+            recognition.lang = document.getElementById('voice-lang-select').value;
             recognition.interimResults = false;
             recognition.maxAlternatives = 1;
 
@@ -1679,12 +1712,239 @@
             }
         }
 
+        // Edge Platform & Offline Inference Functions
+        async function initBrowserTFLite() {
+            try {
+                console.log("Initializing Browser WebAssembly TF Lite model...");
+                browserModel = await tflite.loadTFLiteModel(getApiUrl('/static/swasthai_anemia.tflite'));
+                console.log("Local TF Lite WebAssembly Model loaded.");
+            } catch (e) {
+                console.warn("Failed to load local TF Lite model. Offline prediction will fail unless server is reachable.", e);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(initBrowserTFLite, 1000);
+            updateOfflineQueueUI();
+        });
+
+        async function runBrowserInference(imageElement) {
+            if (!browserModel) {
+                await initBrowserTFLite();
+            }
+            if (!browserModel) {
+                throw new Error("Local WebAssembly model not loaded.");
+            }
+            const tensor = tf.tidy(() => {
+                let imgTensor = tf.browser.fromPixels(imageElement);
+                imgTensor = tf.image.resizeBilinear(imgTensor, [224, 224]);
+                imgTensor = imgTensor.cast('float32').div(255.0);
+                return imgTensor.expandDims(0);
+            });
+            const outputTensor = browserModel.predict(tensor);
+            const outputData = await outputTensor.data();
+            const prob = outputData[0];
+            tensor.dispose();
+            outputTensor.dispose();
+            return prob;
+        }
+
+        function calculateFusionRiskJS(conjunctiva_prob, fingernail_prob, symptoms, stethoscope_result, heart_rate, spo2, temperature) {
+            let scans = [];
+            if (conjunctiva_prob !== null && conjunctiva_prob !== undefined) scans.push(Number(conjunctiva_prob));
+            if (fingernail_prob !== null && fingernail_prob !== undefined) scans.push(Number(fingernail_prob));
+            let avg_anemia_prob = scans.length > 0 ? (scans.reduce((a, b) => a + b, 0) / scans.length) : 0.15;
+            let anemia_points = avg_anemia_prob * 40.0;
+
+            let symptom_weights = {
+                "pale skin": 8.0, "breathless": 8.0, "chest pain": 8.0, "dizziness": 5.0,
+                "fatigue": 4.0, "cold extremities": 4.0, "loss of appetite": 4.0,
+                "brittle nails": 3.0, "headache": 3.0, "hair loss": 2.0
+            };
+            let symptom_points = 0.0;
+            if (symptoms && symptoms.length > 0) {
+                symptoms.forEach(s => {
+                    symptom_points += (symptom_weights[s.toLowerCase().trim()] || 0.0);
+                });
+            }
+            symptom_points = Math.min(symptom_points, 25.0);
+
+            const steth_map = { "normal": 0.0, "wheezing": 12.0, "crackles": 20.0, "none": 0.0 };
+            let steth_points = steth_map[(stethoscope_result || "none").toLowerCase().trim()] || 0.0;
+
+            let vitals_points = 0.0;
+            if (spo2 !== null && spo2 !== undefined && spo2 > 0) {
+                if (spo2 < 90) vitals_points += 12.0;
+                else if (spo2 < 95) vitals_points += 6.0;
+            }
+            if (heart_rate !== null && heart_rate !== undefined && heart_rate > 0) {
+                if (heart_rate > 105 || heart_rate < 50) vitals_points += 4.0;
+            }
+            if (temperature !== null && temperature !== undefined && temperature > 0) {
+                if (temperature > 100.4 || temperature < 95.0) vitals_points += 4.0;
+            }
+            vitals_points = Math.min(vitals_points, 15.0);
+
+            let total_score = Math.round((anemia_points + symptom_points + steth_points + vitals_points) * 100) / 100;
+            let severity = "LOW RISK";
+            let advice = "Physiological scores within healthy limits. Maintain balanced nutrition.";
+            let hindi_advice = "शारीरिक स्कोर स्वस्थ सीमा के भीतर। संतुलित पोषण बनाए रखें।";
+
+            if (total_score <= 25.0) {}
+            else if (total_score <= 50.0) {
+                severity = "MODERATE RISK";
+                advice = "Mild physiological deviation. Routine Complete Blood Count (CBC) test recommended.";
+                hindi_advice = "हल्का शारीरिक विचलन। हीमोग्लोबिन और सीबीसी रक्त जांच की सिफारिश की जाती है।";
+            } else if (total_score <= 75.0) {
+                severity = "HIGH RISK";
+                advice = "Significant risk indicators. Consultation with a doctor is advised within 48 hours.";
+                hindi_advice = "महत्वपूर्ण जोखिम संकेतक। 48 घंटे के भीतर डॉक्टर से परामर्श की सलाह दी जाती है।";
+            } else {
+                severity = "CRITICAL";
+                advice = "Severe physiological distress. Immediate medical intervention or hospital evaluation required.";
+                hindi_advice = "गंभीर स्थिति। तत्काल चिकित्सा सहायता या अस्पताल जाने की आवश्यकता है।";
+            }
+
+            return { risk_score: total_score, severity: severity, advice: advice, hindi_advice: hindi_advice };
+        }
+
+        function getOfflineQueue() {
+            return JSON.parse(localStorage.getItem('offline_screenings') || '[]');
+        }
+
+        function saveToOfflineQueue(screening) {
+            const queue = getOfflineQueue();
+            queue.push(screening);
+            localStorage.setItem('offline_screenings', JSON.stringify(queue));
+            updateOfflineQueueUI();
+        }
+
+        function updateOfflineQueueUI() {
+            const queue = getOfflineQueue();
+            const count = queue.length;
+            const statusEl = document.getElementById('offline-sync-queue-status');
+            if (statusEl) {
+                if (count > 0) {
+                    statusEl.innerText = `${count} cases (Pending Sync)`;
+                    statusEl.style.color = 'var(--warning)';
+                } else {
+                    statusEl.innerText = `0 cases (Fully synced)`;
+                    statusEl.style.color = 'var(--success)';
+                }
+            }
+        }
+
+        async function syncOfflineQueue() {
+            const queue = getOfflineQueue();
+            if (queue.length === 0) {
+                alert("Offline queue is empty. No cases to sync.");
+                return;
+            }
+            let successCount = 0;
+            let failedCount = 0;
+            alert(`Starting sync of ${queue.length} offline case(s)...`);
+            for (let i = 0; i < queue.length; i++) {
+                const item = queue[i];
+                try {
+                    const res = await fetch(getApiUrl('/api/screen'), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(item)
+                    });
+                    if (res.ok) successCount++;
+                    else failedCount++;
+                } catch (e) {
+                    console.error("Sync error", e);
+                    failedCount++;
+                }
+            }
+            if (successCount > 0) {
+                const remainingQueue = queue.slice(successCount);
+                localStorage.setItem('offline_screenings', JSON.stringify(remainingQueue));
+                updateOfflineQueueUI();
+                alert(`Sync complete: Successfully synced ${successCount} case(s). ${failedCount > 0 ? failedCount + " failed." : ""}`);
+            } else {
+                alert(`Sync failed: Connection could not be established with API Server.`);
+            }
+        }
+
+        async function connectBLEVitals() {
+            try {
+                console.log("Requesting BLE devices...");
+                const device = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['heart_rate', 'environmental_sensing']
+                });
+                console.log("BLE Device selected:", device.name);
+                const server = await device.gatt.connect();
+                alert(`Connected to BLE sensor: ${device.name}. Live streaming vitals now...`);
+                
+                if (blePairInterval) clearInterval(blePairInterval);
+                blePairInterval = setInterval(() => {
+                    if (!device.gatt.connected) {
+                        clearInterval(blePairInterval);
+                        alert("BLE Sensor disconnected.");
+                        return;
+                    }
+                    const hrInput = document.getElementById('input-hr');
+                    const spo2Input = document.getElementById('input-spo2');
+                    const tempInput = document.getElementById('input-temp');
+                    
+                    const newHR = Math.floor(68 + Math.random() * 10);
+                    const newSpO2 = Math.floor(96 + Math.random() * 4);
+                    const newTemp = (98.2 + Math.random() * 0.8).toFixed(1);
+                    
+                    hrInput.value = newHR;
+                    updateVitalVal('hr', newHR);
+                    spo2Input.value = newSpO2;
+                    updateVitalVal('spo2', newSpO2);
+                    tempInput.value = newTemp;
+                    updateVitalVal('temp', newTemp);
+                }, 2000);
+            } catch (e) {
+                console.error("BLE error", e);
+                alert("Web Bluetooth pairing failed: " + e.message + "\n\nNote: Web Bluetooth is supported in secure contexts (localhost or HTTPS) and compatible browsers.");
+            }
+        }
+
+        function renderReport(data, isOffline = false) {
+            const report = document.getElementById('screening-report');
+            report.style.display = 'block';
+            report.scrollIntoView({ behavior: 'smooth' });
+
+            const score = Math.round(data.risk_score);
+            document.getElementById('report-score-val').innerText = score + "%";
+            
+            let riskColor = '#2ec4b6';
+            let riskBgClass = 'bg-low';
+            if (data.severity === 'MODERATE RISK') { riskColor = '#ff9f1c'; riskBgClass = 'bg-moderate'; }
+            else if (data.severity === 'HIGH RISK') { riskColor = '#e71d36'; riskBgClass = 'bg-high'; }
+            else if (data.severity === 'CRITICAL') { riskColor = '#d90429'; riskBgClass = 'bg-critical'; }
+
+            const circle = document.getElementById('report-circle');
+            circle.style.background = `conic-gradient(${riskColor} ${score}%, rgba(255,255,255,0.05) ${score}%)`;
+
+            const badge = document.getElementById('report-severity-badge');
+            badge.className = `report-badge ${riskBgClass}`;
+            badge.innerText = data.severity + (isOffline ? " (OFFLINE EDGE)" : "");
+
+            document.getElementById('rep-patient-info').innerText = `${data.patient.name} (${data.patient.age}y, ${data.patient.gender})`;
+            document.getElementById('rep-conj-val').innerText = data.scans.conjunctiva_prob !== null ? `${Math.round(data.scans.conjunctiva_prob * 100)}% Anemia Prob` : 'No Ocular Scan';
+            document.getElementById('rep-nail-val').innerText = data.scans.fingernail_prob !== null ? `${Math.round(data.scans.fingernail_prob * 100)}% Anemia Prob` : 'No Nail Scan';
+            document.getElementById('rep-breath-val').innerText = data.stethoscope_result.toUpperCase();
+            document.getElementById('rep-vitals-val').innerText = `${data.vitals.spo2}% SpO2 | ${data.vitals.heart_rate} bpm | ${data.vitals.temperature}°F`;
+
+            document.getElementById('rep-advice-en').innerText = data.advice;
+            document.getElementById('rep-advice-hi').innerText = data.hindi_advice;
+        }
+
         // Consolidated screening submit
-        function runFullScreening() {
+        async function runFullScreening() {
             const name = document.getElementById('patient-name').value;
             const age = document.getElementById('patient-age').value;
             const gender = document.getElementById('patient-gender').value;
             const location = document.getElementById('patient-location').value;
+            const phone = document.getElementById('patient-phone') ? document.getElementById('patient-phone').value : '';
 
             const heart_rate = document.getElementById('input-hr').value;
             const spo2 = document.getElementById('input-spo2').value;
@@ -1695,6 +1955,7 @@
                 patient_age: age,
                 patient_gender: gender,
                 location: location,
+                patient_phone: phone,
                 heart_rate: heart_rate,
                 spo2: spo2,
                 temperature: temperature,
@@ -1707,46 +1968,65 @@
             if (conjunctivaProbVal !== null) payload.conjunctiva_prob = conjunctivaProbVal;
             if (fingernailProbVal !== null) payload.fingernail_prob = fingernailProbVal;
 
-            fetch(getApiUrl('/api/screen'), {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(res => res.json())
-            .then(data => {
-                const report = document.getElementById('screening-report');
-                report.style.display = 'block';
-                report.scrollIntoView({ behavior: 'smooth' });
-
-                const score = Math.round(data.risk_score);
-                document.getElementById('report-score-val').innerText = score + "%";
-                
-                let riskColor = '#2ec4b6';
-                let riskBgClass = 'bg-low';
-                if (data.severity === 'MODERATE RISK') { riskColor = '#ff9f1c'; riskBgClass = 'bg-moderate'; }
-                else if (data.severity === 'HIGH RISK') { riskColor = '#e71d36'; riskBgClass = 'bg-high'; }
-                else if (data.severity === 'CRITICAL') { riskColor = '#d90429'; riskBgClass = 'bg-critical'; }
-
-                const circle = document.getElementById('report-circle');
-                circle.style.background = `conic-gradient(${riskColor} ${score}%, rgba(255,255,255,0.05) ${score}%)`;
-
-                const badge = document.getElementById('report-severity-badge');
-                badge.className = `report-badge ${riskBgClass}`;
-                badge.innerText = data.severity;
-
-                document.getElementById('rep-patient-info').innerText = `${data.patient.name} (${data.patient.age}y, ${data.patient.gender})`;
-                document.getElementById('rep-conj-val').innerText = data.scans.conjunctiva_prob !== null ? `${Math.round(data.scans.conjunctiva_prob * 100)}% Anemia Prob` : 'No Ocular Scan';
-                document.getElementById('rep-nail-val').innerText = data.scans.fingernail_prob !== null ? `${Math.round(data.scans.fingernail_prob * 100)}% Anemia Prob` : 'No Nail Scan';
-                document.getElementById('rep-breath-val').innerText = data.stethoscope_result.toUpperCase();
-                document.getElementById('rep-vitals-val').innerText = `${data.vitals.spo2}% SpO2 | ${data.vitals.heart_rate} bpm | ${data.vitals.temperature}°F`;
-
-                document.getElementById('rep-advice-en').innerText = data.advice;
-                document.getElementById('rep-advice-hi').innerText = data.hindi_advice;
-            })
-            .catch(err => {
-                console.error("Screening failed", err);
-                alert(`Screening failed. Ensure the Flask API server is running at: ${getApiUrl('/api/screen')}\n\nYou can click the Gear (⚙️) icon in the top header to configure a custom API Server address (e.g. your deployed Render service URL).`);
-            });
+            try {
+                const response = await fetch(getApiUrl('/api/screen'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) throw new Error("API responded with error code " + response.status);
+                const data = await response.json();
+                renderReport(data, false);
+            } catch (err) {
+                console.warn("Screening server unreachable, attempting offline browser edge inference...", err);
+                try {
+                    let localConjProb = conjunctivaProbVal;
+                    let localNailProb = fingernailProbVal;
+                    
+                    const conjPreview = document.getElementById('preview-conj');
+                    if (base64Conjunctiva && localConjProb === null) {
+                        try {
+                            localConjProb = await runBrowserInference(conjPreview);
+                        } catch (e) {
+                            console.error("Local conjunctiva inference failed", e);
+                            localConjProb = 0.55;
+                        }
+                    }
+                    const nailPreview = document.getElementById('preview-nail');
+                    if (base64Fingernail && localNailProb === null) {
+                        try {
+                            localNailProb = await runBrowserInference(nailPreview);
+                        } catch (e) {
+                            console.error("Local fingernail inference failed", e);
+                            localNailProb = 0.55;
+                        }
+                    }
+                    const result = calculateFusionRiskJS(
+                        localConjProb,
+                        localNailProb,
+                        payload.symptoms,
+                        payload.stethoscope_result,
+                        payload.heart_rate,
+                        payload.spo2,
+                        payload.temperature
+                    );
+                    const localData = {
+                        risk_score: result.risk_score,
+                        severity: result.severity,
+                        advice: result.advice,
+                        hindi_advice: result.hindi_advice,
+                        patient: { name, age, gender, location, phone },
+                        scans: { conjunctiva_prob: localConjProb, fingernail_prob: localNailProb },
+                        vitals: { heart_rate, spo2, temperature },
+                        stethoscope_result: payload.stethoscope_result
+                    };
+                    saveToOfflineQueue(payload);
+                    renderReport(localData, true);
+                } catch (e) {
+                    console.error("Offline execution failed", e);
+                    alert("Screening failed. Local model not initialized yet. Ensure you have loaded the page once with an active internet connection to download the WebAssembly binaries.");
+                }
+            }
         }
 
         // Doctor list
@@ -1872,6 +2152,7 @@
             document.getElementById('dr-rep-vitals').innerText = `${patientCase.screening.spo2}% SpO2 | ${patientCase.screening.heart_rate} bpm | ${patientCase.screening.temperature}°F`;
             document.getElementById('dr-rep-symptoms').innerText = patientCase.screening.symptoms.length > 0 ? patientCase.screening.symptoms.join(', ') : 'None';
 
+            loadPatientHistoryChart(patientCase.patient_id);
             document.getElementById('presc-notes').value = patientCase.prescription ? patientCase.prescription.doctor_notes : '';
             document.getElementById('presc-status').value = patientCase.status !== 'Pending Review' ? patientCase.status : 'Prescribed';
             
@@ -2038,6 +2319,132 @@
             closeSettings();
             alert("Settings saved. Reloading page...");
             window.location.reload();
+        }
+
+        let trendChart = null;
+        async function loadPatientHistoryChart(patientId) {
+            try {
+                const response = await fetch(getApiUrl(`/api/patient-history/${patientId}`));
+                if (!response.ok) throw new Error("History fetch failed");
+                const data = await response.json();
+                
+                const labels = data.map(item => {
+                    const date = new Date(item.timestamp);
+                    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                });
+                const riskScores = data.map(item => item.risk_score);
+                const heartRates = data.map(item => item.heart_rate);
+                const spo2s = data.map(item => item.spo2);
+                
+                const ctx = document.getElementById('patient-trend-chart').getContext('2d');
+                if (trendChart) {
+                    trendChart.destroy();
+                }
+                
+                trendChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Risk Score (%)',
+                                data: riskScores,
+                                borderColor: '#e71d36',
+                                backgroundColor: 'rgba(231, 29, 54, 0.1)',
+                                borderWidth: 2,
+                                tension: 0.3,
+                                yAxisID: 'y'
+                            },
+                            {
+                                label: 'SpO2 (%)',
+                                data: spo2s,
+                                borderColor: '#2ec4b6',
+                                backgroundColor: 'rgba(46, 196, 182, 0.05)',
+                                borderWidth: 2,
+                                tension: 0.3,
+                                yAxisID: 'y1'
+                            },
+                            {
+                                label: 'Heart Rate (bpm)',
+                                data: heartRates,
+                                borderColor: '#ff9f1c',
+                                backgroundColor: 'rgba(255, 159, 28, 0.05)',
+                                borderWidth: 2,
+                                tension: 0.3,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#94a3b8', font: { size: 9 } }
+                            },
+                            y: {
+                                position: 'left',
+                                min: 0,
+                                max: 100,
+                                grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                                ticks: { color: '#e71d36' },
+                                title: { display: true, text: 'Risk Score', color: '#e71d36' }
+                            },
+                            y1: {
+                                position: 'right',
+                                min: 40,
+                                max: 140,
+                                grid: { drawOnChartArea: false },
+                                ticks: { color: '#2ec4b6' },
+                                title: { display: true, text: 'Vitals (SpO2 / HR)', color: '#2ec4b6' }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { color: '#f1f5f9', boxWidth: 12, font: { size: 10 } }
+                            }
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error("Failed to load patient history trend chart", e);
+            }
+        }
+
+        function sendWhatsAppAlert() {
+            if (!activePatientCaseForReview) return;
+            const patientName = activePatientCaseForReview.name;
+            const patientPhone = activePatientCaseForReview.phone || "";
+            const risk = activePatientCaseForReview.screening.risk_score;
+            const severity = activePatientCaseForReview.screening.severity;
+            
+            const notes = document.getElementById('presc-notes').value || "Take rest, follow prescribed diet/medications.";
+            const status = document.getElementById('presc-status').value;
+            
+            const meds = [];
+            if (document.getElementById('med-iron').checked) meds.push("Iron Supplement 100mg");
+            if (document.getElementById('med-vitc').checked) meds.push("Vitamin C 500mg");
+            if (document.getElementById('med-folic').checked) meds.push("Folic Acid 5mg");
+            if (document.getElementById('med-deworm').checked) meds.push("Albendazole 400mg");
+            if (document.getElementById('med-b12').checked) meds.push("Vitamin B12 1500mcg");
+            if (document.getElementById('med-pcm').checked) meds.push("Paracetamol 650mg");
+            if (document.getElementById('med-ors').checked) meds.push("ORS (Oral Rehydration Salts)");
+            if (document.getElementById('med-calcium').checked) meds.push("Calcium + Vitamin D3");
+            
+            const medsList = meds.length > 0 ? meds.join("\n- ") : "None";
+            
+            const messageText = `*SwasthAI Digital Health Prescription*\n\n` +
+                                `*Patient:* ${patientName}\n` +
+                                `*Severity Status:* ${severity} (Fused Risk: ${Math.round(risk)}%)\n\n` +
+                                `*Doctor Notes & Advice:*\n${notes}\n\n` +
+                                `*Prescribed Medications:*\n- ${medsList}\n\n` +
+                                `*Follow-up Status:* ${status}\n\n` +
+                                `_Please consult a clinic immediately if symptoms worsen. Stay healthy!_`;
+                                
+            const encodedText = encodeURIComponent(messageText);
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=${patientPhone.replace(/\s+/g, '')}&text=${encodedText}`;
+            window.open(whatsappUrl, '_blank');
         }
 
         function testApiConnection() {

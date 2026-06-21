@@ -78,6 +78,16 @@ def serve_dashboard():
     return app.send_static_file("index.html")
 
 
+@app.route("/static/swasthai_anemia.tflite", methods=["GET"])
+def serve_tflite_model():
+    """Serve the TFLite model file statically."""
+    from flask import send_from_directory
+    return send_from_directory(
+        os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models"),
+        "swasthai_anemia.tflite"
+    )
+
+
 # ──────────────────────────────────────────────
 # API DOCUMENTATION & HEALTH
 # ──────────────────────────────────────────────
@@ -257,6 +267,7 @@ def full_screening():
         return jsonify({"error": "No payload provided"}), 400
 
     name = data.get("patient_name", "Anonymous")
+    phone = data.get("patient_phone", "")
     try:
         age = int(data.get("patient_age")) if data.get("patient_age") else 30
     except (ValueError, TypeError):
@@ -371,7 +382,8 @@ def full_screening():
         spo2=spo2,
         temperature=temperature,
         risk_score=fusion_report["risk_score"],
-        severity=fusion_report["severity"]
+        severity=fusion_report["severity"],
+        phone=phone
     )
 
     # Prepare detailed response
@@ -406,6 +418,13 @@ def get_cases():
     """Retrieve list of patient screenings for the Doctor Dashboard."""
     cases = db_manager.get_all_cases()
     return jsonify(cases)
+
+
+@app.route("/api/patient-history/<int:patient_id>", methods=["GET"])
+def get_patient_history_route(patient_id):
+    """Fetch historical screenings for a given patient ID."""
+    history = db_manager.get_patient_history(patient_id)
+    return jsonify(history)
 
 
 @app.route("/api/prescribe", methods=["POST"])
